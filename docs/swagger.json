@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a sample server Petstore server.",
-        "title": "Swagger Example API",
+        "description": "This is a sample server on Gorrilla Mux + MongoDB.",
+        "title": "MonGorilla Project",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "name": "API Support",
@@ -15,7 +15,61 @@
         },
         "version": "1.0"
     },
-    "host": "petstore.swagger.io",
+    "host": "mongorilla.swagger.io",
     "basePath": "/v2",
-    "paths": {}
+    "paths": {
+        "/movies": {
+            "post": {
+                "description": "Creating Movie in DB with given request body",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "create new movie",
+                "parameters": [
+                    {
+                        "description": "Введите фильм",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AddMovieBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.AddMovieBody": {
+            "type": "object",
+            "properties": {
+                "movie": {
+                    "type": "string"
+                },
+                "watched": {
+                    "type": "boolean"
+                }
+            }
+        }
+    }
 }

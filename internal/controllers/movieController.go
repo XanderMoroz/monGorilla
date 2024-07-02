@@ -29,7 +29,7 @@ func checkNilError(err error) {
 	}
 }
 
-func init() {
+func InitMongoDB() {
 	// Client option
 	clientOptions := options.Client().ApplyURI(connectRemote)
 
@@ -50,6 +50,7 @@ func init() {
 //insert one record
 
 func insertOneMovie(movie models.Netflix) {
+
 	inserted, err := collection.InsertOne(context.Background(), movie)
 	checkNilError(err)
 	fmt.Println("Inserted one movie with ID:", inserted.InsertedID)
@@ -115,6 +116,15 @@ func GetAlIMovies(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(allMovies)
 }
 
+// @Summary        create new movie
+// @Description    Creating Movie in DB with given request body
+// @Tags           Movies
+// @Accept         json
+// @Produce        json
+// @Param          request         	body        models.AddMovieBody    true    "Введите фильм"
+// @Success        201              {string}    string
+// @Failure        400              {string}    string    "Bad Request"
+// @Router         /movies 			[post]
 func CreateMovie(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Allow-Control-Allow-Methods", "POST")
