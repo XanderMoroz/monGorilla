@@ -27,9 +27,11 @@ type AppEnvConfig struct {
 	DbName     string
 }
 
-// Указатель на БД
-// (он будет осуществлять запросы)
-// var DB *gorm.DB
+// Указатель на контекст соединения с монго
+var MongoCtx context.Context
+
+// Указатель на коллекцию
+var MongoCollection *mongo.Collection
 
 // Извлкает переменные окружения и складывает в DBEnvConfig
 func GetEnvConfig() *AppEnvConfig {
@@ -66,9 +68,10 @@ func ConnectToMongo() {
 		envConfig.DbHost,
 		envConfig.DbPort,
 	)
-	log.Println("Подключаемся к БД:")
-	log.Printf("Адрес БД: <%s> ...", DBURL)
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	log.Printf("Адрес БД: <%s>:", DBURL)
+	log.Printf("Название БД: <%s>:", envConfig.DbName)
+	log.Println("Подключаемся к БД...")
 
 	mongoClient, err := mongo.Connect(
 		ctx,
@@ -92,5 +95,27 @@ func ConnectToMongo() {
 		log.Fatalf("ping mongodb error :%v", err)
 		return
 	}
-	fmt.Println("ping success")
+	log.Println("...успешно")
+
+	// database and collection
+	// database := mongoClient.Database(envConfig.DbName)
+	// sampleCollection := database.Collection("movie_collection")
+	// sampleCollection.Drop(ctx)
+	MongoCollection = mongoClient.Database(envConfig.DbName).Collection("movie_coll")
+	MongoCtx = ctx
+	// MongoCollection = sampleCollection
+	// insertedDocument := bson.M{
+	// 	"name":       "michael",
+	// 	"content":    "test content",
+	// 	"bank_money": 1000,
+	// 	"create_at":  time.Now(),
+	// }
+	// insertedResult, err := sampleCollection.InsertOne(ctx, insertedDocument)
+
+	// if err != nil {
+	// 	log.Fatalf("inserted error : %v", err)
+	// 	return
+	// }
+	// fmt.Println("======= inserted id ================")
+	// log.Printf("inserted ID is : %v", insertedResult.InsertedID)
 }

@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/movies": {
+        "/api/movie": {
             "post": {
                 "description": "Creating Movie in DB with given request body",
                 "consumes": [
@@ -83,8 +83,8 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "mongorilla.swagger.io",
-	BasePath:         "/v2",
+	Host:             "127.0.0.1:4000/",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "MonGorilla Project",
 	Description:      "This is a sample server on Gorrilla Mux + MongoDB.",

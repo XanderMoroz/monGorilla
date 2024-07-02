@@ -8,6 +8,7 @@ import (
 	"github.com/XanderMoroz/mongoMovies/database"
 
 	_ "github.com/XanderMoroz/mongoMovies/docs"
+	// "github.com/XanderMoroz/mongoMovies/internal/controllers"
 	"github.com/XanderMoroz/mongoMovies/internal/routers"
 )
 
@@ -23,11 +24,13 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host mongorilla.swagger.io
-// @BasePath /v2
+// @host 127.0.0.1:4000/
+// // @BasePath /v1
 func main() {
 
 	database.ConnectToMongo()
+	// controllers.InitMongoDB()
+
 	fmt.Println("MongoDB setup for Golang")
 	r := routers.Router()
 	fmt.Println("Server Is Getting Started...")

@@ -15,10 +15,9 @@
         },
         "version": "1.0"
     },
-    "host": "mongorilla.swagger.io",
-    "basePath": "/v2",
+    "host": "127.0.0.1:4000/",
     "paths": {
-        "/movies": {
+        "/api/movie": {
             "post": {
                 "description": "Creating Movie in DB with given request body",
                 "consumes": [

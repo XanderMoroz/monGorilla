@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,10 +14,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
+	"github.com/XanderMoroz/mongoMovies/database"
 	"github.com/XanderMoroz/mongoMovies/internal/models"
 )
 
-const connectRemote = "mongodb://localhost:27017"
+const connectRemote = "mongodb://127.0.0.1:27017/authSource=admin"
 const dbName = "netflix"
 const colName = "watchedlist"
 
@@ -124,14 +126,47 @@ func GetAlIMovies(w http.ResponseWriter, r *http.Request) {
 // @Param          request         	body        models.AddMovieBody    true    "Введите фильм"
 // @Success        201              {string}    string
 // @Failure        400              {string}    string    "Bad Request"
-// @Router         /movies 			[post]
+// @Router         /api/movie 			[post]
 func CreateMovie(w http.ResponseWriter, r *http.Request) {
+
+	log.Println("Поступил запрос на создание новой записи в БД...")
+	var movie models.Netflix
+	log.Println("Извлекаю тело запроса...")
+	err := json.NewDecoder(r.Body).Decode(&movie)
+	if err != nil {
+		log.Printf("При извлечении тела запроса - Произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	} else {
+		log.Println("...успешно")
+		log.Printf("Тело запроса: %+v", movie)
+	}
+	// moviesCollection := database.MongoDB.Collection("movie_collection")
+	// moviesCollection.Drop(database.MongoCtx)
+
+	insertedDocument := bson.M{
+		"name":       "Царица",
+		"content":    "test content",
+		"bank_money": 1000,
+		"create_at":  time.Now(),
+	}
+	insertedResult, err := database.MongoCollection.InsertOne(
+		database.MongoCtx,
+		insertedDocument,
+	)
+	// inserted, err := database.MongoCollection.InsertOne(context.Background(), movie)
+	// checkNilError(err)
+	// fmt.Println("Inserted one movie with ID:", inserted.InsertedID)
+
+	if err != nil {
+		log.Fatalf("inserted error : %v", err)
+		return
+	}
+	fmt.Println("======= inserted id ================")
+	log.Printf("inserted ID is : %v", insertedResult.InsertedID)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Allow-Control-Allow-Methods", "POST")
-
-	var movie models.Netflix
-	_ = json.NewDecoder(r.Body).Decode(&movie)
-	insertOneMovie(movie)
 	json.NewEncoder(w).Encode(movie)
 }
 
