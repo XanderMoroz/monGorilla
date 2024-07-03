@@ -19,6 +19,54 @@ import (
 
 var userCollection *mongo.Collection = configs.GetCollection(configs.DB, "users")
 
+// @Summary        create new movie
+// @Description    Creating Movie in DB with given request body
+// @Tags           Movies
+// @Accept         json
+// @Produce        json
+// @Param          request         	body        models.CreateUserBody    true    "Введите фильм"
+// @Success        201              {string}    string
+// @Failure        400              {string}    string    "Bad Request"
+// @Router         /api/movie 			[post]
+func CreateMovie(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Allow-Control-Allow-Methods", "POST")
+
+	log.Println("Поступил запрос на создание новой записи в БД...")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	var user models.User
+	defer cancel()
+
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		log.Printf("При извлечении тела запроса - Произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	} else {
+		log.Println("...успешно")
+		// log.Printf("Тело запроса: %+v", user)
+	}
+
+	newUser := models.User{
+		Id:       primitive.NewObjectID(),
+		Name:     user.Name,
+		Location: user.Location,
+		Title:    user.Title,
+	}
+
+	result, err := userCollection.InsertOne(ctx, newUser)
+	if err != nil {
+		log.Printf("При добавлении новой записи - Произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	} else {
+		log.Println("Новая запись успешно добавлена:")
+		log.Printf("ID новой записи: %v", result.InsertedID)
+	}
+
+	json.NewEncoder(w).Encode(newUser)
+}
+
 func checkNilError(err error) {
 	if err != nil {
 		log.Fatal(err)
@@ -94,54 +142,6 @@ func GetAlIMovies(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Allow-Control-Allow-Methods", "GET")
 	allMovies := getAllMovies()
 	json.NewEncoder(w).Encode(allMovies)
-}
-
-// @Summary        create new movie
-// @Description    Creating Movie in DB with given request body
-// @Tags           Movies
-// @Accept         json
-// @Produce        json
-// @Param          request         	body        models.CreateUserBody    true    "Введите фильм"
-// @Success        201              {string}    string
-// @Failure        400              {string}    string    "Bad Request"
-// @Router         /api/movie 			[post]
-func CreateMovie(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Allow-Control-Allow-Methods", "POST")
-
-	log.Println("Поступил запрос на создание новой записи в БД...")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	var user models.User
-	defer cancel()
-
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		log.Printf("При извлечении тела запроса - Произошла ошибка: <%v>\n", err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	} else {
-		log.Println("...успешно")
-		// log.Printf("Тело запроса: %+v", user)
-	}
-
-	newUser := models.User{
-		Id:       primitive.NewObjectID(),
-		Name:     user.Name,
-		Location: user.Location,
-		Title:    user.Title,
-	}
-
-	result, err := userCollection.InsertOne(ctx, newUser)
-	if err != nil {
-		log.Printf("При добавлении новой записи - Произошла ошибка: <%v>\n", err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	} else {
-		log.Println("Новая запись успешно добавлена:")
-		log.Printf("ID новой записи: %v", result.InsertedID)
-	}
-
-	json.NewEncoder(w).Encode(newUser)
 }
 
 func MarkAsWatched(w http.ResponseWriter, r *http.Request) {
