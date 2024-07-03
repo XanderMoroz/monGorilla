@@ -44,7 +44,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.AddMovieBody"
+                            "$ref": "#/definitions/models.CreateUserBody"
                         }
                     }
                 ],
@@ -66,14 +66,22 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.AddMovieBody": {
+        "models.CreateUserBody": {
             "type": "object",
+            "required": [
+                "location",
+                "name",
+                "title"
+            ],
             "properties": {
-                "movie": {
+                "location": {
                     "type": "string"
                 },
-                "watched": {
-                    "type": "boolean"
+                "name": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         }

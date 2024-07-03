@@ -1,10 +1,16 @@
 definitions:
-  models.AddMovieBody:
+  models.CreateUserBody:
     properties:
-      movie:
+      location:
         type: string
-      watched:
-        type: boolean
+      name:
+        type: string
+      title:
+        type: string
+    required:
+    - location
+    - name
+    - title
     type: object
 host: 127.0.0.1:4000/
 info:
@@ -31,7 +37,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/models.AddMovieBody'
+          $ref: '#/definitions/models.CreateUserBody'
       produces:
       - application/json
       responses:

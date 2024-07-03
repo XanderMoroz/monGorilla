@@ -12,18 +12,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/XanderMoroz/mongoMovies/database"
+	"github.com/XanderMoroz/mongoMovies/configs"
 	"github.com/XanderMoroz/mongoMovies/internal/models"
 )
 
-const connectRemote = "mongodb://127.0.0.1:27017/authSource=admin"
-const dbName = "netflix"
-const colName = "watchedlist"
-
-// Important
-var collection *mongo.Collection
+var userCollection *mongo.Collection = configs.GetCollection(configs.DB, "users")
 
 func checkNilError(err error) {
 	if err != nil {
@@ -31,32 +25,16 @@ func checkNilError(err error) {
 	}
 }
 
-func InitMongoDB() {
-	// Client option
-	clientOptions := options.Client().ApplyURI(connectRemote)
-
-	//Connect to mongodb
-	client, err := mongo.Connect(context.TODO(), clientOptions)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("MongoDB connection Done")
-
-	collection = client.Database(dbName).Collection(colName)
-	//Collection ready
-	fmt.Println("Collection is ready")
-}
-
 //MongoDB helpers
 
 //insert one record
 
-func insertOneMovie(movie models.Netflix) {
+// func insertOneMovie(movie models.Netflix) {
 
-	inserted, err := collection.InsertOne(context.Background(), movie)
-	checkNilError(err)
-	fmt.Println("Inserted one movie with ID:", inserted.InsertedID)
-}
+// 	inserted, err := collection.InsertOne(context.Background(), movie)
+// 	checkNilError(err)
+// 	fmt.Println("Inserted one movie with ID:", inserted.InsertedID)
+// }
 
 // update one record
 
@@ -65,7 +43,7 @@ func updateOneMovie(movieID string) {
 	checkNilError(err)
 	filter := bson.M{"_id": id}
 	update := bson.M{"$set": bson.M{"watched": true}}
-	result, err := collection.UpdateOne(context.Background(), filter, update)
+	result, err := userCollection.UpdateOne(context.Background(), filter, update)
 	checkNilError(err)
 	fmt.Println("Modified Count:", result.ModifiedCount)
 }
@@ -75,7 +53,7 @@ func deleteOneMovie(movieID string) {
 	id, err := primitive.ObjectIDFromHex(movieID)
 	checkNilError(err)
 	filter := bson.M{"_id": id}
-	delCount, err := collection.DeleteOne(context.Background(), filter)
+	delCount, err := userCollection.DeleteOne(context.Background(), filter)
 	checkNilError(err)
 	fmt.Println("Deleted Movie Count:", delCount)
 }
@@ -83,7 +61,7 @@ func deleteOneMovie(movieID string) {
 //delete all record
 
 func deleteAllMovie() int64 {
-	delCount, err := collection.DeleteMany(context.Background(), bson.D{{}}, nil)
+	delCount, err := userCollection.DeleteMany(context.Background(), bson.D{{}}, nil)
 	checkNilError(err)
 	fmt.Println("No of movies deleted:", delCount.DeletedCount)
 	return delCount.DeletedCount
@@ -93,7 +71,7 @@ func deleteAllMovie() int64 {
 //get all movies from DB
 
 func getAllMovies() []primitive.M {
-	cur, err := collection.Find(context.Background(), bson.D{{}})
+	cur, err := userCollection.Find(context.Background(), bson.D{{}})
 	checkNilError(err)
 
 	var movies []primitive.M
@@ -123,51 +101,47 @@ func GetAlIMovies(w http.ResponseWriter, r *http.Request) {
 // @Tags           Movies
 // @Accept         json
 // @Produce        json
-// @Param          request         	body        models.AddMovieBody    true    "Введите фильм"
+// @Param          request         	body        models.CreateUserBody    true    "Введите фильм"
 // @Success        201              {string}    string
 // @Failure        400              {string}    string    "Bad Request"
 // @Router         /api/movie 			[post]
 func CreateMovie(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Allow-Control-Allow-Methods", "POST")
 
 	log.Println("Поступил запрос на создание новой записи в БД...")
-	var movie models.Netflix
-	log.Println("Извлекаю тело запроса...")
-	err := json.NewDecoder(r.Body).Decode(&movie)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	var user models.User
+	defer cancel()
+
+	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		log.Printf("При извлечении тела запроса - Произошла ошибка: <%v>\n", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	} else {
 		log.Println("...успешно")
-		log.Printf("Тело запроса: %+v", movie)
+		// log.Printf("Тело запроса: %+v", user)
 	}
-	// moviesCollection := database.MongoDB.Collection("movie_collection")
-	// moviesCollection.Drop(database.MongoCtx)
 
-	insertedDocument := bson.M{
-		"name":       "Царица",
-		"content":    "test content",
-		"bank_money": 1000,
-		"create_at":  time.Now(),
+	newUser := models.User{
+		Id:       primitive.NewObjectID(),
+		Name:     user.Name,
+		Location: user.Location,
+		Title:    user.Title,
 	}
-	insertedResult, err := database.MongoCollection.InsertOne(
-		database.MongoCtx,
-		insertedDocument,
-	)
-	// inserted, err := database.MongoCollection.InsertOne(context.Background(), movie)
-	// checkNilError(err)
-	// fmt.Println("Inserted one movie with ID:", inserted.InsertedID)
 
+	result, err := userCollection.InsertOne(ctx, newUser)
 	if err != nil {
-		log.Fatalf("inserted error : %v", err)
+		log.Printf("При добавлении новой записи - Произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
+	} else {
+		log.Println("Новая запись успешно добавлена:")
+		log.Printf("ID новой записи: %v", result.InsertedID)
 	}
-	fmt.Println("======= inserted id ================")
-	log.Printf("inserted ID is : %v", insertedResult.InsertedID)
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Allow-Control-Allow-Methods", "POST")
-	json.NewEncoder(w).Encode(movie)
+	json.NewEncoder(w).Encode(newUser)
 }
 
 func MarkAsWatched(w http.ResponseWriter, r *http.Request) {

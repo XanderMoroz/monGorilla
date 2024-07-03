@@ -33,15 +33,23 @@ var MongoCtx context.Context
 // Указатель на коллекцию
 var MongoCollection *mongo.Collection
 
+// var (
+//
+//	Client     *mongo.Client
+//	Collection *mongo.Collection
+//
+// )
+var DB *mongo.Database
+
 // Извлкает переменные окружения и складывает в DBEnvConfig
 func GetEnvConfig() *AppEnvConfig {
 
-	log.Println("Извлекаем переменные окружения...")
+	log.Print("Извлекаем переменные окружения...")
 	err := godotenv.Load("./.env")
 	if err != nil {
 		log.Fatalf("Не удалось извлечь .env")
 	}
-	log.Println("...успешно")
+	log.Print("...успешно")
 
 	return &AppEnvConfig{
 		AppSecret: os.Getenv("API_SECRET"),
@@ -56,7 +64,7 @@ func GetEnvConfig() *AppEnvConfig {
 }
 
 // Подключается к БД
-func ConnectToMongo() {
+func ConnectToMongo() (*mongo.Database, error) {
 
 	envConfig := GetEnvConfig()
 
@@ -69,40 +77,44 @@ func ConnectToMongo() {
 		envConfig.DbPort,
 	)
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	log.Println("Подключаемся к БД...")
 	log.Printf("Адрес БД: <%s>:", DBURL)
 	log.Printf("Название БД: <%s>:", envConfig.DbName)
-	log.Println("Подключаемся к БД...")
 
-	mongoClient, err := mongo.Connect(
+	client, err := mongo.Connect(
 		ctx,
 		options.Client().ApplyURI(DBURL),
 	)
 
 	defer func() {
 		cancel()
-		if err := mongoClient.Disconnect(ctx); err != nil {
+		if err := client.Disconnect(ctx); err != nil {
 			log.Fatalf("mongodb disconnect error : %v", err)
 		}
 	}()
 
 	if err != nil {
 		log.Fatalf("connection error :%v", err)
-		return
+		return nil, err
 	}
 
-	err = mongoClient.Ping(ctx, readpref.Primary())
+	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
 		log.Fatalf("ping mongodb error :%v", err)
-		return
+		return nil, err
 	}
 	log.Println("...успешно")
+	MongoCollection = client.Database(envConfig.DbName).Collection("movie_coll")
+	MongoCtx = ctx
+	db := client.Database("appName") // Change me!
+
+	return db, nil
 
 	// database and collection
 	// database := mongoClient.Database(envConfig.DbName)
 	// sampleCollection := database.Collection("movie_collection")
 	// sampleCollection.Drop(ctx)
-	MongoCollection = mongoClient.Database(envConfig.DbName).Collection("movie_coll")
-	MongoCtx = ctx
+
 	// MongoCollection = sampleCollection
 	// insertedDocument := bson.M{
 	// 	"name":       "michael",

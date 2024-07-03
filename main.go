@@ -5,11 +5,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/XanderMoroz/mongoMovies/database"
+	"github.com/XanderMoroz/mongoMovies/configs"
+	"github.com/XanderMoroz/mongoMovies/internal/routers"
 
 	_ "github.com/XanderMoroz/mongoMovies/docs"
-	// "github.com/XanderMoroz/mongoMovies/internal/controllers"
-	"github.com/XanderMoroz/mongoMovies/internal/routers"
 )
 
 // @title MonGorilla Project
@@ -28,12 +27,11 @@ import (
 // // @BasePath /v1
 func main() {
 
-	database.ConnectToMongo()
-	// controllers.InitMongoDB()
+	configs.ConnectDB()
 
-	fmt.Println("MongoDB setup for Golang")
-	r := routers.Router()
-	fmt.Println("Server Is Getting Started...")
+	r := routers.CommonRouter()
+
+	fmt.Println("=========== MonGorilla Start ============")
+	fmt.Println("== URL: http://127.0.0.1:4000/swagger/ ==")
 	log.Fatal(http.ListenAndServe(":4000", r))
-	fmt.Println("Listening 4000 port...")
 }
