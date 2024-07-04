@@ -42,55 +42,18 @@ Go Blog - готовая основа для быстрой сборки backend
 | :----------: | :------------------------- | :------------------------------------------------ |
 |  [**POST**]  | /api/users                 | Регистрация нового пользователя                   |
 |  [**GET**]   | /api/users                 | Извлечь всех пользователей про логину и паролю    |
-|  [**GET**]   | /api/v1/current_user       | Извлечение авторизованного пользователя по токену |
-|  [**GET**]   | /api/v1/logout             | Разлогиниться                                     |
-|  [**POST**]  | /categories                | Создать новую категорию                           |
-|  [**GET**]   | /categories                | Извлечь все категории                             |
-|  [**POST**]  | /categories/add_article    | Добавить статью в категорию                       |
-|  [**POST**]  | /categories/remove_article | Удалить статью из категории                       |
-|  [**GET**]   | /articles                  | Извлечь все статьи                                |
-|  [**POST**]  | /articles                  | Создать новую статью                              |
-|  [**GET**]   | /articles/:id              | Извлечь статью по ID                              |
-|  [**PUT**]   | /articles/:id              | Обновить статью (только для авторов)              |
-| [**DELETE**] | /articles/:id              | Удалить статью (только для авторов)               |
-|  [**POST**]  | /article/{id}/add_comment  | Добавить комментарий к статье                     |
-
-
-
-
-| HTTP Method  | HTTP request        | Description                                       |
-| :----------: | :------------------ | :------------------------------------------------ |
-|  [**POST**]  | /users/register     | Регистрация нового пользователя                   |
-|  [**POST**]  | /users/login        | Авторизация пользователя про логину и паролю      |
-|  [**GET**]   | /api/admin/user     | Извлечение авторизованного пользователя по токену |
-|  [**GET**]   | /users/logout       | Разлогиниться                                     |
-|  [**POST**]  | /genres             | Создать новый жанр категорию                      |
-|  [**GET**]   | /genres             | Извлечь все категории                             |
-|  [**POST**]  | /genres/add_book    | Добавить связь между книгой и жанром              |
-|  [**POST**]  | /genres/remove_book | Удалить связь между книгой и жанром               |
-|  [**GET**]   | /books              | Извлечь все книги                                 |
-|  [**POST**]  | /books              | Создать новую книгу (только для админов)          |
-|  [**GET**]   | /books/:id          | Извлечь книгу по ID                               |
-|  [**PUT**]   | /books/:id          | Обновить книгу (только для админов)               |
-| [**DELETE**] | /books/:id          | Удалить книгу (только для админов)                |
-|  [**POST**]  | /user/orders        | Создать новый заказ                               |
-|  [**GET**]   | /user/orders/:id    | Извлечь заказ по ID (только собственный)          |
-|              |                     | Добавить позицию с книгой в заказ                 |
-|              |                     | Удалить позицию с книгой из заказа                |
-
-
+|  [**GET**]   | /api/users/{id}            | Извлечение  пользователя по ID                    |
+|  [**PUT**]   | /api/users/{id}            | Обновить пользователя по ID                       |
+| [**DELETE**] | /api/users/{id}            | Удалить пользователя по ID                        |
 
 
 ## <a name="database_scheme"> 💾 База данных </a>
 
   
 
-База данных содержит 6 моделей:
-**Автор публикации** (User),
-**Категория статьи** (Category),
-**Cтатья** (Article),
-**Статья в категории** (ArticleCategory),
-**Комментарий** (Comment)
+База данных содержит 1 модель:
+    - **Пользователь** (User)
+
 
   
   
@@ -100,22 +63,14 @@ Go Blog - готовая основа для быстрой сборки backend
 
 <summary>ДЕТАЛЬНАЯ ИНФОРМАЦИЯ О МОДЕЛЯХ </summary>
 
-  
-  
-
 </details>
 
-  
 
 <details>
 
 <summary>ДЕТАЛЬНАЯ СХЕМА БАЗЫ ДАННЫХ</summary>
 
-  
-
 ![Screen Shot](docs/extras/erd.jpg)
-
-  
 
 </details>
 
@@ -133,7 +88,7 @@ Go Blog - готовая основа для быстрой сборки backend
 
 ```sh
 
-git clone https://github.com/XanderMoroz/goBlog.git
+git clone https://github.com/XanderMoroz/mongoMovies.git
 
 ```
 
@@ -143,32 +98,35 @@ git clone https://github.com/XanderMoroz/goBlog.git
 
 ```sh
 
-# JWT SETTINGS
+################################################################################
+# APP Config
+# Automatically setup app variables
+################################################################################
+APP_ENV="DEV"
+APP_PORT=":8080"
+SERVER_ADDRESS=""
+ACCESS_TOKEN_SECRET="nduenvrvneu8957hhoiif932ejcp92nf9ne7h3p2982jijpkm2[jw[8h"
+ACCESS_TOKEN_EXPIRY_HOUR=1
+################################################################################
+# MONGO Config
+# Automatically create database and user
+################################################################################
+MONGO_DB_DRIVER="mongodb"
+MONGO_ROOT_USERNAME="xander"
+MONGO_ROOT_PASSWORD="rndm-pass"
+MONGO_DB_NAME="mongorilla"
+MONGO_DB_PORT="27017"
+# MONGO_DB_HOST="127.0.0.1"   # Без docker 
+MONGO_DB_HOST="mongo"       # С docker
+################################################################################
+# MONGO_EXPRESS Config
+# Automatically create database client credentials
+################################################################################
+MONGO_EXPRESS_USERNAME="admin"
+MONGO_EXPRESS_PASSWORD="rndm-pass"
+MONGO_EXPRESS_SERVER="mongodb"
 
-JWT_SECRET_KEY="SomeAppSecret"
 
-# POSTGRES SETTINGS
-DB_DRIVER=postgres
-DB_USER=xander
-DB_PASSWORD=password
-DB_NAME=go_blog_api
-DB_PORT=5432
-DB_HOST=go_blog-postgres # С docker
-# DB_HOST=127.0.0.1 # Без docker
-
-# POSTGRES TEST SETTINGS
-TEST_DB_HOST=go_blog-postgres_test # С docker
-# TEST_DB_HOST=127.0.0.1 # Без docker
-TEST_DB_DRIVER=postgres
-TEST_API_SECRET=some_secret
-TEST_DB_USER=xander
-TEST_DB_PASSWORD=password
-TEST_DB_NAME=go_blog_api_test
-TEST_DB_PORT=5432
-
-# PGADMIN SETTINGS
-PGADMIN_DEFAULT_EMAIL=xander@admin.com
-PGADMIN_DEFAULT_PASSWORD=pwd123
 
 ```
 
@@ -186,7 +144,7 @@ sudo docker-compose up --build
 
 - Fiber APP: http://127.0.0.1:8080/
 - Swagger: http://127.0.0.1:8080/swagger/index.html
-- PGAdmin4: http://127.0.0.1:5050
+- Mongo-Express: http://127.0.0.1:8081
 - Prometheus: http://127.0.0.1:9090
 - Grafana: http://127.0.0.1:3000
 
@@ -194,80 +152,82 @@ sudo docker-compose up --build
 3. ### Дополнительные настройки 
 
 <details>
-<summary>Как подключить PGAdmin4 к БД? </summary>
+<summary>Как получить доступ к БД через Mongo-Express? </summary>
 
-1. Заходим в браузер по адресу http://127.0.0.1:5050 и вводим данные из .env
+1. Заходим в браузер по адресу Mongo-Express и вводим данные по умолчанию:
 
 ```bash
-PGADMIN_DEFAULT_EMAIL=guest@admin.com
-PGADMIN_DEFAULT_PASSWORD=pwd123
+MONGO_EXPRESS_USERNAME=admin
+MONGO_EXPRESS_PASSWORD=pass
 ```
 Картинка
   
 
 </details>
+<details>
+<summary>Как подключить Grafana к Prometheus? </summary>
 
 
+1. Заходим в браузер по адресу http://127.0.0.1:3000 и вводим данные по умолчанию:
 
-5. Авто-генерация документации swagger
+  - Email or username: admin
+  - Password: admin
 
-3.1 Как подключить PGAdmin4 к БД
+![Screen Shot](docs/extras/grafana_auth_01.jpg)
+
+2. После система потребует придумать новый пароль (это необязательно).
+
+![Screen Shot](docs/extras/grafana_auth_02.jpg)
+
+3. Мы авторизованы в сервисе Grafana. Добавим новое подключение...
+
+![Screen Shot](docs/extras/grafana_settings_01.jpg)
+
+4. Ищем в списке Prometheus и кликаем по нему
+
+![Screen Shot](docs/extras/grafana_settings_02.jpg)
+
+5. Теперь его нужно настроить
+
+![Screen Shot](docs/extras/grafana_settings_03.jpg)
+
+7. Извлекаем адрес хоста, на котором расположился Prometheus
+
+```bash
+sudo docker inspect prometheus | grep IPAddress
+```
+![Screen Shot](docs/extras/grafana_get_host.jpg)
+
+8. Заполняем Адрес сервера Prometheus данными хоста 
+
+![Screen Shot](docs/extras/grafana_settings_04.jpg)
+
+9. Готово
+
+</details>
 
 
+<details>
+<summary>Как сделать авто-генерацию документации Swagger? </summary>
 
-
-
-Устанавливаете swag
+1. Устанавливаете swag
 
 ```sh
-
 go get github.com/swaggo/swag/cmd/swag
-
 ```
-
-  
 
 3.2 Устанавливаете GOPATH
 
 ```sh
-
 export PATH=$PATH:$(go env GOPATH)/bin
-
 ```
-
-  
 
 3.3 Генерируете новый вариант документации
 
 ```bash
-
-swag init -g main.go
-
+swag init
 ```
-
-  
-
-4. ### Как подключить pgadmin к контейнеру с БД (postgres)
-
-  
-
-4.1 Поднимаем контейнеры
-
-```bash
-
-sudo docker-compose up --build
-
-```
-
-  
+</details>
 
 
-  
-
-4.3 Уточняем порт, на котором работает БД (чтоб подключиться к ней)
-
-```bash
-
-sudo docker inspect go_blog_postgres | grep IPAddress
-
-```
+## <a name="license"> ©️ License
