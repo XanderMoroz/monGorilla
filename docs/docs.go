@@ -24,9 +24,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/movie": {
+        "/api/users": {
             "post": {
-                "description": "Creating Movie in DB with given request body",
+                "description": "Creating User in DB with given request body",
                 "consumes": [
                     "application/json"
                 ],
@@ -34,12 +34,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Movies"
+                    "Users"
                 ],
-                "summary": "create new movie",
+                "summary": "create new user",
+                "operationId": "create-new-user",
                 "parameters": [
                     {
-                        "description": "Введите фильм",
+                        "description": "Enter user data",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -63,6 +64,45 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/users/{id}": {
+            "get": {
+                "description": "Get a user by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "get a user by ID",
+                "operationId": "get-user-by-id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UserID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -74,6 +114,28 @@ const docTemplate = `{
                 "title"
             ],
             "properties": {
+                "location": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.User": {
+            "type": "object",
+            "required": [
+                "location",
+                "name",
+                "title"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
                 "location": {
                     "type": "string"
                 },

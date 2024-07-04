@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -27,11 +26,13 @@ import (
 // // @BasePath /v1
 func main() {
 
+	log.Println("Настраиваем подключение к MongoDB...")
 	configs.ConnectDB()
+	log.Println("...успешно")
 
 	r := routers.CommonRouter()
 
-	fmt.Println("=========== MonGorilla Start ============")
-	fmt.Println("== URL: http://127.0.0.1:4000/swagger/ ==")
+	log.Println("=========== MonGorilla Start ============")
+	log.Println("== URL: http://127.0.0.1:4000/swagger/ ==")
 	log.Fatal(http.ListenAndServe(":4000", r))
 }

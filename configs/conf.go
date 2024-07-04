@@ -11,7 +11,6 @@ import (
 
 func ConnectDB() *mongo.Client {
 
-	log.Println("Настраиваем подключение к MongoDB...")
 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://xander:rndm-pass@127.0.0.1:27017/"))
 	if err != nil {
 		log.Fatal(err)
@@ -27,8 +26,6 @@ func ConnectDB() *mongo.Client {
 	err = client.Ping(ctx, nil)
 	if err != nil {
 		log.Fatal(err)
-	} else {
-		log.Println("...успешно")
 	}
 
 	return client

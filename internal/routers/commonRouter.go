@@ -23,8 +23,11 @@ func CommonRouter() *mux.Router {
 		httpSwagger.DomID("swagger-ui"),
 	)).Methods(http.MethodGet)
 
+	// User routes
+	router.HandleFunc("/api/users", controllers.CreateUser).Methods("POST")
+	router.HandleFunc("/api/users/{id}", controllers.GetUserByID).Methods("GET")
+
 	router.HandleFunc("/api/movies", controllers.GetAlIMovies).Methods("GET")
-	router.HandleFunc("/api/movie", controllers.CreateMovie).Methods("POST")
 	router.HandleFunc("/api/movie/{id}", controllers.MarkAsWatched).Methods("PUT")
 	router.HandleFunc("/api/movie/{id}", controllers.DeleteMovie).Methods("DELETE")
 	router.HandleFunc("/api/deleteallmovies", controllers.DeleteAllMovies).Methods("DELETE")

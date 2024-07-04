@@ -19,16 +19,23 @@ import (
 
 var userCollection *mongo.Collection = configs.GetCollection(configs.DB, "users")
 
-// @Summary        create new movie
-// @Description    Creating Movie in DB with given request body
-// @Tags           Movies
+func checkNilError(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+// @Summary        create new user
+// @Description    Creating User in DB with given request body
+// @Tags           Users
+// @ID				create-new-user
 // @Accept         json
 // @Produce        json
-// @Param          request         	body        models.CreateUserBody    true    "Введите фильм"
-// @Success        201              {string}    string
-// @Failure        400              {string}    string    "Bad Request"
-// @Router         /api/movie 			[post]
-func CreateMovie(w http.ResponseWriter, r *http.Request) {
+// @Param          request         		body        models.CreateUserBody    true    "Enter user data"
+// @Success        201              	{string}    string
+// @Failure        400              	{string}    string    "Bad Request"
+// @Router         /api/users 			[post]
+func CreateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Allow-Control-Allow-Methods", "POST")
 
@@ -67,10 +74,38 @@ func CreateMovie(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(newUser)
 }
 
-func checkNilError(err error) {
+// @Summary		get a user by ID
+// @Description Get a user by ID
+// @Tags 		Users
+// @ID			get-user-by-id
+// @Produce		json
+// @Param		id					path		string			true	"UserID"
+// @Success		200					{object}	models.User
+// @Failure		404					{object}	[]string
+// @Router		/api/users/{id} 	[get]
+func GetUserByID(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Allow-Control-Allow-Methods", "GET")
+
+	params := mux.Vars(r)
+	log.Printf("Поступил запрос на извлечение записи по ID: <%s>\n", params["id"])
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	userId := params["id"]
+	var user models.User
+	defer cancel()
+
+	objId, _ := primitive.ObjectIDFromHex(userId)
+
+	err := userCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&user)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("При извлечении записи -произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	} else {
+		log.Printf("Запись успешно извлечена: <%+v>\n", user)
 	}
+	json.NewEncoder(w).Encode(user)
 }
 
 //MongoDB helpers
