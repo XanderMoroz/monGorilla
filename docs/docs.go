@@ -25,6 +25,28 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/api/users": {
+            "get": {
+                "description": "Get all users from db",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "get all users",
+                "operationId": "get-all-users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.User"
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Creating User in DB with given request body",
                 "consumes": [

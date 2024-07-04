@@ -108,6 +108,45 @@ func GetUserByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
+// @Summary		get all users
+// @Description Get all users from db
+// @Tags 		Users
+// @ID			get-all-users
+// @Produce		json
+// @Success		200		{object}	[]models.User
+// @Router		/api/users [get]
+func GetAllUsers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Allow-Control-Allow-Methods", "GET")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	var users []models.User
+	defer cancel()
+
+	results, err := userCollection.Find(ctx, bson.M{})
+
+	if err != nil {
+		log.Printf("При извлечении списка записей -произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	//reading from the db in an optimal way
+	defer results.Close(ctx)
+	for results.Next(ctx) {
+		var singleUser models.User
+		if err = results.Decode(&singleUser); err != nil {
+			log.Printf("При обработке списка записей -произошла ошибка: <%v>\n", err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		users = append(users, singleUser)
+	}
+
+	json.NewEncoder(w).Encode(users)
+}
+
 //MongoDB helpers
 
 //insert one record

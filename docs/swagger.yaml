@@ -42,6 +42,21 @@ info:
   version: "1.0"
 paths:
   /api/users:
+    get:
+      description: Get all users from db
+      operationId: get-all-users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+      summary: get all users
+      tags:
+      - Users
     post:
       consumes:
       - application/json
