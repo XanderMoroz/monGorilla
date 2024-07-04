@@ -24,7 +24,7 @@ services:
     environment:                                                # Прокидываем переменные окружения
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-    # volumes:                                                    # Монтируем тома с данными БД
+    # volumes:                                                  # Монтируем тома с данными БД
     #   - mongo-data:/data/db/                                    
     #   - mongo-log:/var/log.mongodb/
     networks:                                                   # Подключаем к сети
@@ -45,6 +45,64 @@ services:
       - mongo
     networks:                                                   # Подключаем к сети
       - mongorilla_network
+
+  prometheus:                                                   # Название сервиса (Система мониторинга)
+    container_name: prometheus                                  # Название контейнера 
+    image: prom/prometheus:latest                               # Название:версия образа (prom/prometheus:latest)
+    volumes:  
+      - ./etc/prometheus:/etc/prometheus/                       # Монтируем том с данными из prometheus
+    hostname: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml            # Устанавливаем конфигурацию из файла prometheus.yml
+    ports:
+      - 9090:9090                                               # Связываем порты хоста:контейнера 
+    restart: unless-stopped
+    environment:
+      TZ: "Europe/Moscow"
+    networks:
+      - mongorilla_network
+
+# Извлекает данные хоста (cpu, memory) 
+  node-exporter:                                                # Название сервиса 
+    container_name: exporter                                    # Название контейнера 
+    image: prom/node-exporter                                   # Название:версия образа (prom/node-exporter:latest)
+    volumes:                                                    # Монтируем том с данными хоста
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    hostname: exporter
+    command:
+      - --path.procfs=/host/proc
+      - --path.sysfs=/host/sys
+      - --collector.filesystem.ignored-mount-points
+      - ^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)
+    ports:                                                      # Связываем порты хоста:контейнера
+      - 9100:9100
+    restart: unless-stopped
+    environment:
+      TZ: "Europe/Moscow"
+    networks:
+      - mongorilla_network
+
+  # Визуализация данных на дашборде
+  grafana:                                                      # Название сервиса 
+    container_name: grafana                                     # Название контейнера 
+    image: grafana/grafana                                      # Название:версия образа (prom/node-exporter:latest)
+    user: root
+    depends_on:
+      - prometheus
+    ports:                                                      # Связываем порты хоста:контейнера
+      - 3000:3000
+    volumes:                                                    # Монтируем том с данными grafana
+      - ./etc/grafana:/var/lib/grafana
+      - ./etc/grafana/provisioning/:/etc/grafana/provisioning/
+    hostname: grafana
+    restart: unless-stopped
+    environment:
+      TZ: "Europe/Moscow"
+    networks:
+      - mongorilla_network
+
 
 # Список томов
 volumes:
