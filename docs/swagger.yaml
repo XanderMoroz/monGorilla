@@ -84,6 +84,33 @@ paths:
       tags:
       - Users
   /api/users/{id}:
+    delete:
+      description: Delete a user by ID
+      operationId: delete-user-by-id
+      parameters:
+      - description: UserID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            items:
+              type: string
+            type: array
+      summary: delete a user by ID
+      tags:
+      - Users
     get:
       description: Get a user by ID
       operationId: get-user-by-id
@@ -107,6 +134,39 @@ paths:
               type: string
             type: array
       summary: get a user by ID
+      tags:
+      - Users
+    put:
+      description: Update user by ID
+      operationId: update-user-by-id
+      parameters:
+      - description: UserID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Введите новые данные пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            items:
+              type: string
+            type: array
+      summary: update user by ID
       tags:
       - Users
 swagger: "2.0"

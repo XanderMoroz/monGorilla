@@ -2,6 +2,7 @@ package configs
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -11,7 +12,21 @@ import (
 
 func ConnectDB() *mongo.Client {
 
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://xander:rndm-pass@127.0.0.1:27017/"))
+	envConfig := GetEnvConfig()
+
+	DBURL := fmt.Sprintf(
+		"%s://%s:%s@%s:%s/",
+		envConfig.Dbdriver,
+		envConfig.DbUser,
+		envConfig.DbPassword,
+		envConfig.DbHost,
+		envConfig.DbPort,
+	)
+	// log.Println("Подключаемся к БД...")
+	// log.Printf("Адрес БД: <%s>:", DBURL)
+	// log.Printf("Название БД: <%s>:", envConfig.DbName)
+
+	client, err := mongo.NewClient(options.Client().ApplyURI(DBURL))
 	if err != nil {
 		log.Fatal(err)
 	}

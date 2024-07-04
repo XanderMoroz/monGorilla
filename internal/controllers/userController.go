@@ -3,7 +3,6 @@ package controllers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -18,12 +17,6 @@ import (
 )
 
 var userCollection *mongo.Collection = configs.GetCollection(configs.DB, "users")
-
-func checkNilError(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
-}
 
 // @Summary        create new user
 // @Description    Creating User in DB with given request body
@@ -126,7 +119,7 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	results, err := userCollection.Find(ctx, bson.M{})
 
 	if err != nil {
-		log.Printf("При извлечении списка записей -произошла ошибка: <%v>\n", err.Error())
+		log.Printf("При извлечении списка записей - произошла ошибка: <%v>\n", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -147,100 +140,108 @@ func GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
-//MongoDB helpers
-
-//insert one record
-
-// func insertOneMovie(movie models.Netflix) {
-
-// 	inserted, err := collection.InsertOne(context.Background(), movie)
-// 	checkNilError(err)
-// 	fmt.Println("Inserted one movie with ID:", inserted.InsertedID)
-// }
-
-// update one record
-
-func updateOneMovie(movieID string) {
-	id, err := primitive.ObjectIDFromHex(movieID)
-	checkNilError(err)
-	filter := bson.M{"_id": id}
-	update := bson.M{"$set": bson.M{"watched": true}}
-	result, err := userCollection.UpdateOne(context.Background(), filter, update)
-	checkNilError(err)
-	fmt.Println("Modified Count:", result.ModifiedCount)
-}
-
-// delete one record
-func deleteOneMovie(movieID string) {
-	id, err := primitive.ObjectIDFromHex(movieID)
-	checkNilError(err)
-	filter := bson.M{"_id": id}
-	delCount, err := userCollection.DeleteOne(context.Background(), filter)
-	checkNilError(err)
-	fmt.Println("Deleted Movie Count:", delCount)
-}
-
-//delete all record
-
-func deleteAllMovie() int64 {
-	delCount, err := userCollection.DeleteMany(context.Background(), bson.D{{}}, nil)
-	checkNilError(err)
-	fmt.Println("No of movies deleted:", delCount.DeletedCount)
-	return delCount.DeletedCount
-
-}
-
-//get all movies from DB
-
-func getAllMovies() []primitive.M {
-	cur, err := userCollection.Find(context.Background(), bson.D{{}})
-	checkNilError(err)
-
-	var movies []primitive.M
-
-	for cur.Next(context.Background()) {
-		var movie bson.M
-		err := cur.Decode(&movie)
-		checkNilError(err)
-		movies = append(movies, movie)
-	}
-	defer cur.Close(context.Background())
-	return movies
-
-}
-
-//Actual Controllers
-
-func GetAlIMovies(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Allow-Control-Allow-Methods", "GET")
-	allMovies := getAllMovies()
-	json.NewEncoder(w).Encode(allMovies)
-}
-
-func MarkAsWatched(w http.ResponseWriter, r *http.Request) {
+// @Summary			update user by ID
+// @Description 	Update user by ID
+// @ID				update-user-by-id
+// @Tags 			Users
+// @Produce			json
+// @Param			id					path		string									true	"UserID"
+// @Param           request         	body        models.CreateUserBody    true    	"Введите новые данные пользователя"
+// @Success			200	{object}		[]string
+// @Failure			404	{object}		[]string
+// @Router			/api/users/{id} 	[put]
+func UpdateUserByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Allow-Control-Allow-Methods", "PUT")
-	params := mux.Vars(r)
-	updateOneMovie(params["id"])
-	json.NewEncoder(w).Encode(params)
 
+	params := mux.Vars(r)
+	log.Printf("Поступил запрос на обновление записи по ID: <%s>\n", params["id"])
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	userId := params["id"]
+	var user models.User
+	defer cancel()
+
+	objId, _ := primitive.ObjectIDFromHex(userId)
+
+	//validate the request body
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		log.Printf("При извлечении тела запроса - Произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	} else {
+		log.Println("...успешно")
+	}
+
+	update := bson.M{"name": user.Name, "location": user.Location, "title": user.Title}
+
+	result, err := userCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
+	if err != nil {
+		log.Printf("При обновлении записи -произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	//get updated user details
+	var updatedUser models.User
+	if result.MatchedCount == 1 {
+		err := userCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&updatedUser)
+		if err != nil {
+			log.Printf("При извлечении записи -произошла ошибка: <%v>\n", err.Error())
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+	}
+
+	json.NewEncoder(w).Encode(updatedUser)
 }
 
-func DeleteMovie(w http.ResponseWriter, r *http.Request) {
+// @Summary		delete a user by ID
+// @Description Delete a user by ID
+// @ID			delete-user-by-id
+// @Tags 		Users
+// @Produce		json
+// @Param		id					path		string		true	"UserID"
+// @Success		200					{object}	[]string
+// @Failure		404					{object}	[]string
+// @Router		/api/users/{id} 	[delete]
+func DeleteBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Allow-Control-Allow-Methods", "DELETE")
 
 	params := mux.Vars(r)
-	deleteOneMovie(params["id"])
-	json.NewEncoder(w).Encode(params["id"])
+	log.Printf("Поступил запрос на удаление записи по ID: <%s>\n", params["id"])
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	userId := params["id"]
+	defer cancel()
 
+	objId, _ := primitive.ObjectIDFromHex(userId)
+
+	result, err := userCollection.DeleteOne(ctx, bson.M{"id": objId})
+	if err != nil {
+		log.Printf("При удалении записи - произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if result.DeletedCount < 1 {
+		log.Printf("При извлечении тела запроса - Произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	json.NewEncoder(w).Encode("User successfully deleted!")
 }
 
-func DeleteAllMovies(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Allow-Control-Allow-Methods", "DELETE")
-	count := deleteAllMovie()
-	json.NewEncoder(w).Encode(count)
+//MongoDB helpers
+// func checkNilError(err error) {
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// }
 
-}
+// func deleteAllMovie() int64 {
+// 	delCount, err := userCollection.DeleteMany(context.Background(), bson.D{{}}, nil)
+// 	checkNilError(err)
+// 	fmt.Println("No of movies deleted:", delCount.DeletedCount)
+// 	return delCount.DeletedCount
+// }
