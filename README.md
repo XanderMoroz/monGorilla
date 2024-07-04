@@ -1,8 +1,6 @@
-# Go Blog
+# monGorilla
 
-  
-
-Go Blog - готовая основа для быстрой сборки backend-сервисов на основе `Go Fiber`, Документация на основе `Swagger`, в соответствии со стандартом OpenAPI.
+monGorilla - готовая основа для быстрой сборки backend-сервисов на основе `Go Fiber`, Документация на основе `Swagger`, в соответствии со стандартом OpenAPI.
 
   
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
