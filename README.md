@@ -84,7 +84,7 @@ monGorilla - готовая основа для быстрой сборки back
 
 ```sh
 
-git clone https://github.com/XanderMoroz/mongoMovies.git
+git clone https://github.com/XanderMoroz/monGorilla.git
 
 ```
 
