@@ -8,7 +8,9 @@ import (
 )
 
 type AppEnvConfig struct {
-	AppSecret  string
+	AppSecret string
+	AppPort   string
+
 	Dbdriver   string
 	DbUser     string
 	DbPassword string
@@ -29,6 +31,7 @@ func GetEnvConfig() *AppEnvConfig {
 
 	return &AppEnvConfig{
 		AppSecret: os.Getenv("API_SECRET"),
+		AppPort:   os.Getenv("APP_PORT"),
 
 		Dbdriver:   os.Getenv("MONGO_DB_DRIVER"),
 		DbUser:     os.Getenv("MONGO_ROOT_USERNAME"),

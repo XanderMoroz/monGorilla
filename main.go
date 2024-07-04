@@ -22,9 +22,11 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host 127.0.0.1:4000/
+// @host 127.0.0.1:8080/
 // // @BasePath /v1
 func main() {
+
+	settings := configs.GetEnvConfig()
 
 	log.Println("Настраиваем подключение к MongoDB...")
 	configs.ConnectDB()
@@ -33,6 +35,6 @@ func main() {
 	r := routers.CommonRouter()
 
 	log.Println("=========== MonGorilla Start ============")
-	log.Println("== URL: http://127.0.0.1:4000/swagger/ ==")
-	log.Fatal(http.ListenAndServe(":4000", r))
+	log.Println("== URL: http://127.0.0.1:8080/swagger/ ==")
+	log.Fatal(http.ListenAndServe(settings.AppPort, r))
 }

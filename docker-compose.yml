@@ -1,107 +1,59 @@
-# version: '3'
-
-# services:
-#   # app:
-#   #   container_name: go_blog_app                                 # Название контейнера
-#   #   build: .                                                    # Образ контейнера берем из текущей папки
-#   #   ports:                                                      # Связываем порты хоста:контейнера
-#   #     - 8080:8080 
-#   #   restart: on-failure
-#   #   volumes:                                                    # Монтируем том с приложением
-#   #     - api:/usr/src/app/
-#   #   depends_on:
-#   #     - go_blog-postgres
-#   #   networks:                                                   # Подключаем к сети
-#   #     - go_blog_network
-
-#   # go_blog-postgres:
-#   #   container_name: go_blog_postgres                            # Название контейнера
-#   #   image: postgres:15                                          # Название:версия образа (postgres:15.7-alpine)
-#   #   environment:                                                # Берем из .env
-#   #     - POSTGRES_USER=${DB_USER}  
-#   #     - POSTGRES_PASSWORD=${DB_PASSWORD}
-#   #     - POSTGRES_DB=${DB_NAME}
-#   #     - DATABASE_HOST=${DB_HOST} 
-#   #   ports:                                                      # Связываем порты хоста:контейнера
-#   #     - '5432:5432'
-#   #   volumes:                                                    # Монтируем том с данными из БД
-#   #     - database_postgres:/var/lib/postgresql/data
-#   #   networks:                                                   # Подключаем к сети
-#   #     - go_blog_network
-
-#   mongodb:                                                        # Название сервиса
-#     container_name: goMovies_mongo                                # Название контейнера
-#     image: mongo:latest                                           # Название:версия образа (postgres:15.7-alpine)
-#     ports:                                                        # Связываем порты хоста:контейнера
-#       - "27017:27017"
-#     env_file:
-#       - .env
-#     environment:
-#       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
-#       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-#     volumes:
-#       - mongo-data:/data/db/
-#       - mongo-log:/var/log.mongodb/
-
-#   mongo-express:
-#     image: mongo-express:latest
-#     restart: always
-#     ports:
-#       - "8081:8081"
-#     env_file:
-#       - .env
-#     environment:
-#       ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_EXPRESS_USERNAME}
-#       ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_EXPRESS_PASSWORD}
-#       ME_CONFIG_MONGODB_SERVER: mongodb://admin:pass@db:27017/ #${MONGO_EXPRESS_SERVER}
-#     depends_on:
-#       - mongodb                                                   # Ставим в зависимость от БД
-
-
-# # # Список томов
-# volumes:
-#   mongo-data:
-#   mongo-log:
-# #   api:
-# #   database_postgres:               
-
-# # # Настройки сети (чтоб контейнеры могли обмениваться данными)
-# # networks:
-# #   go_blog_network:
-# #     driver: bridge
-
-
 version: '3.9'
 services:
-  mongo:
-    image: mongo:latest
-    container_name: test-mongo
-    restart: always
-    ports:
-      - 27017:27017
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-    networks:                                                   # Подключаем к сети
-      - mongorilla_network
 
-
-  mongo-client:
-    image: mongo-express:latest
-    restart: always
-    ports:
-      - 8081:8081
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_EXPRESS_USERNAME}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_EXPRESS_PASSWORD}
-      ME_CONFIG_MONGODB_URL: mongodb://xander:rndm-pass@mongo:27017/
-    depends_on:
+  app:                                                          # Название сервиса
+    container_name: mongorilla_app                              # Название контейнера
+    build: .                                                    # Образ контейнера берем из текущей папки
+    ports:                                                      # Связываем порты хоста:контейнера
+      - 8080:8080 
+    restart: on-failure
+    volumes:                                                    # Монтируем том с приложением
+      - api:/usr/src/app/
+    depends_on:                                                 # Ставим в зависимость от БД
       - mongo
     networks:                                                   # Подключаем к сети
       - mongorilla_network
 
 
-# # # Настройки сети (чтоб контейнеры могли обмениваться данными)
+  mongo:                                                        # Название сервиса
+    image: mongo:latest                                         # Название:версия образа (mongo:latest)
+    container_name: mongorilla_mongo                            # Название контейнера
+    restart: always
+    ports:                                                      # Связываем порты хоста:контейнера
+      - 27017:27017
+    environment:                                                # Прокидываем переменные окружения
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    # volumes:                                                    # Монтируем тома с данными БД
+    #   - mongo-data:/data/db/                                    
+    #   - mongo-log:/var/log.mongodb/
+    networks:                                                   # Подключаем к сети
+      - mongorilla_network
+
+
+  mongo-express:                                                # Название сервиса
+    image: mongo-express:latest                                 # Название:версия образа (mongo-express:latest)
+    container_name: mongorilla_express                          # Название контейнера
+    restart: always
+    ports:                                                      # Связываем порты хоста:контейнера
+      - 8081:8081                 
+    environment:                                                # Прокидываем переменные окружения
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_EXPRESS_USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_EXPRESS_PASSWORD}
+      ME_CONFIG_MONGODB_URL: mongodb://xander:rndm-pass@mongo:27017/
+    depends_on:                                                 # Ставим в зависимость от БД
+      - mongo
+    networks:                                                   # Подключаем к сети
+      - mongorilla_network
+
+# Список томов
+volumes:
+  api:
+#   mongo-data:
+#   mongo-log:
+
+
+# Настройки сети (чтоб контейнеры могли обмениваться данными)
 networks:
   mongorilla_network:
     driver: bridge
