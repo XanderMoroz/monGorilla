@@ -1,7 +1,5 @@
 # monGorilla
 
-monGorilla - готовая основа для быстрой сборки backend-сервисов на основе `Go Fiber`, Документация на основе `Swagger`, в соответствии со стандартом OpenAPI.
-
   
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
@@ -27,7 +25,7 @@ monGorilla - готовая основа для быстрой сборки back
 
 ## <a name="what-is-this"> 🌀 Описание проекта</a>
 
-Go Blog - готовая основа для быстрой сборки backend-сервисов на основе `Gorilla Mux`, База данных - `Mongo`. Интерфейс Базы данных - `GORM`. Интерфейс API `Swagger`. Мониторинг - `Prometheus`. Метрики хоста - `Node Exporter`. Визуализация - `Grafana`. Сборка - `Docker Compose`.
+monGorilla - готовая основа для быстрой сборки backend-сервисов на основе `Gorilla Mux`, База данных - `Mongo`. Интерфейс Базы данных - `GORM`. Интерфейс API `Swagger`. Мониторинг - `Prometheus`. Метрики хоста - `Node Exporter`. Визуализация - `Grafana`. Сборка - `Docker Compose`.
 
 ## <a name="api_docs"> 📈 Краткая документация API</a>
 
