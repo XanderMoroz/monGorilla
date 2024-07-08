@@ -1,12 +1,13 @@
 package controllers
 
 import (
-	"context"
 	"encoding/json"
+	"context"
+	"net/http"
+	// "reflect"
+	"time"
 	"fmt"
 	"log"
-	"net/http"
-	"time"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
@@ -28,9 +29,9 @@ var userCollection *mongo.Collection = configs.GetCollection(configs.DB, "users"
 // @Tags         Auth
 // @Accept       json
 // @Produce      json
-// @Param        userModelArgs 	body 			models.UserRegisterArgs true "UserRegister"
-// @Success      200  			{object}  		models.UserRegisterResult
-// @Router       /api/users/register [post]
+// @Param        userModelArgs 			body 			models.UserRegisterArgs true "UserRegister"
+// @Success      200  					{object}  		models.UserRegisterResult
+// @Router       /api/users/register 	[post]
 func Register(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodPost {
 		return fmt.Errorf("method not allowed %s", r.Method)
@@ -88,192 +89,193 @@ func Register(w http.ResponseWriter, r *http.Request) error {
 		return api.WriteJSON(w, http.StatusOK, userRegisterResult)
 	}
 
-	checking_models := database.Model[models.UserModel]{
-		Stg: controller.Storage.GetCursor(),
-	}
-	result, err := checking_models.Get(
-		fmt.Sprintf(
-			"email = %s OR phone_number = %s",
-			userRegisterArgs.Email, userRegisterArgs.PhoneNumber),
-	)
-	if err != nil || !reflect.DeepEqual(result, models.UserModel{}) {
-		userRegisterResult.Result.Success = false
-		userRegisterResult.Result.ErrorCode = utils.ERR0404
-		userRegisterResult.Result.ErrorDescription = utils.ERR0404.ToDescription()
-		userRegisterResult.Result.ErrorException = utils.ExceptionToString(err)
+	// checking_models := database.Model[models.UserModel]{
+	// 	Stg: controller.Storage.GetCursor(),
+	// }
+	// result, err := checking_models.Get(
+	// 	fmt.Sprintf(
+	// 		"email = %s OR phone_number = %s",
+	// 		userRegisterArgs.Email, userRegisterArgs.PhoneNumber),
+	// )
+	// if err != nil || !reflect.DeepEqual(result, models.UserModel{}) {
+	// 	userRegisterResult.Result.Success = false
+	// 	userRegisterResult.Result.ErrorCode = utils.ERR0404
+	// 	userRegisterResult.Result.ErrorDescription = utils.ERR0404.ToDescription()
+	// 	userRegisterResult.Result.ErrorException = utils.ExceptionToString(err)
 
-		return api.WriteJSON(w, http.StatusOK, userRegisterResult)
-	}
+	// 	return api.WriteJSON(w, http.StatusOK, userRegisterResult)
+	// }
 
-	hashed_password, err := utils.HashPassword(userRegisterArgs.Password)
-	if err != nil {
-		userRegisterResult.Result.Success = false
-		userRegisterResult.Result.ErrorCode = utils.ERR0405
-		userRegisterResult.Result.ErrorDescription = utils.ERR0405.ToDescription()
-		userRegisterResult.Result.ErrorException = utils.ExceptionToString(err)
+	// hashed_password, err := utils.HashPassword(userRegisterArgs.Password)
+	// if err != nil {
+	// 	userRegisterResult.Result.Success = false
+	// 	userRegisterResult.Result.ErrorCode = utils.ERR0405
+	// 	userRegisterResult.Result.ErrorDescription = utils.ERR0405.ToDescription()
+	// 	userRegisterResult.Result.ErrorException = utils.ExceptionToString(err)
 
-		return api.WriteJSON(w, http.StatusOK, userRegisterResult)
-	}
+	// 	return api.WriteJSON(w, http.StatusOK, userRegisterResult)
+	// }
 
-	to_register := new(models.UserModel)
-	to_register.Id = utils.NewID()
-	to_register.FirstName = userRegisterArgs.FirstName
-	to_register.LastName = userRegisterArgs.LastName
-	to_register.Email = userRegisterArgs.Email
-	to_register.PhoneNumber = userRegisterArgs.PhoneNumber
-	to_register.Password = hashed_password
+	// to_register := new(models.UserModel)
+	// to_register.Id = utils.NewID()
+	// to_register.FirstName = userRegisterArgs.FirstName
+	// to_register.LastName = userRegisterArgs.LastName
+	// to_register.Email = userRegisterArgs.Email
+	// to_register.PhoneNumber = userRegisterArgs.PhoneNumber
+	// to_register.Password = hashed_password
 
-	if err := checking_models.Insert(*to_register); err != nil {
-		userRegisterResult.Result.Success = false
-		userRegisterResult.Result.ErrorCode = utils.ERR0407
-		userRegisterResult.Result.ErrorDescription = utils.ERR0407.ToDescription()
-		userRegisterResult.Result.ErrorException = utils.ExceptionToString(err)
+	// if err := checking_models.Insert(*to_register); err != nil {
+	// 	userRegisterResult.Result.Success = false
+	// 	userRegisterResult.Result.ErrorCode = utils.ERR0407
+	// 	userRegisterResult.Result.ErrorDescription = utils.ERR0407.ToDescription()
+	// 	userRegisterResult.Result.ErrorException = utils.ExceptionToString(err)
 
-		return api.WriteJSON(w, http.StatusOK, userRegisterResult)
-	}
+	// 	return api.WriteJSON(w, http.StatusOK, userRegisterResult)
+	// }
 
-	userRegisterResult.Result.Success = true
-	userRegisterResult.Result.ErrorCode = ""
-	userRegisterResult.Result.ErrorDescription = ""
+	// userRegisterResult.Result.Success = true
+	// userRegisterResult.Result.ErrorCode = ""
+	// userRegisterResult.Result.ErrorDescription = ""
 
-	return api.WriteJSON(w, http.StatusOK, userRegisterResult)
+	// return api.WriteJSON(w, http.StatusOK, userRegisterResult)
+	return nil
 }
 
 
-// Login   LoginAccount godoc
-// @Summary      Login to your account
-// @Description  Login with username and password
-// @Tags         Auth
-// @Accept       json
-// @Produce      json
-// @Param        userModelArgs 	body 		models.UserLoginArgs 	true 	"UserLogin"
-// @Success      200  			{object}  	models.UserLoginResult
-// @Router       /api/users/login [post]
-func Login(w http.ResponseWriter, r *http.Request) error {
-	// Валидируем метод запроса
-	if r.Method != http.MethodPost {
-		return fmt.Errorf("method not allowed %s", r.Method)
-	}
+// // Login   LoginAccount godoc
+// // @Summary      Login to your account
+// // @Description  Login with username and password
+// // @Tags         Auth
+// // @Accept       json
+// // @Produce      json
+// // @Param        userModelArgs 	body 		models.UserLoginArgs 	true 	"UserLogin"
+// // @Success      200  			{object}  	models.UserLoginResult
+// // @Router       /api/users/login [post]
+// func Login(w http.ResponseWriter, r *http.Request) error {
+// 	// Валидируем метод запроса
+// 	if r.Method != http.MethodPost {
+// 		return fmt.Errorf("method not allowed %s", r.Method)
+// 	}
 
-	userLoginResult := new(models.UserLoginResult)
-	userLoginArgs := new(models.UserLoginArgs)
+// 	userLoginResult := new(models.UserLoginResult)
+// 	userLoginArgs := new(models.UserLoginArgs)
 
-	if err := json.NewDecoder(r.Body).Decode(userLoginArgs); err != nil {
-		userLoginResult.Result.Success = false
-		userLoginResult.Result.ErrorCode = utils.ERR0303
-		userLoginResult.Result.ErrorDescription = utils.ERR0303.ToDescription()
-		userLoginResult.Result.ErrorException = utils.ExceptionToString(err)
+// 	if err := json.NewDecoder(r.Body).Decode(userLoginArgs); err != nil {
+// 		userLoginResult.Result.Success = false
+// 		userLoginResult.Result.ErrorCode = utils.ERR0303
+// 		userLoginResult.Result.ErrorDescription = utils.ERR0303.ToDescription()
+// 		userLoginResult.Result.ErrorException = utils.ExceptionToString(err)
 
-		return api.WriteJSON(w, http.StatusOK, userLoginResult)
-	}
+// 		return api.WriteJSON(w, http.StatusOK, userLoginResult)
+// 	}
 
-	if ok := utils.ValidateCheckSpaceCharacter(userLoginArgs.Email, userLoginArgs.Password); !ok {
-		userLoginResult.Result.Success = false
-		userLoginResult.Result.ErrorCode = utils.ERR0304
-		userLoginResult.Result.ErrorDescription = utils.ERR0304.ToDescription()
+// 	if ok := utils.ValidateCheckSpaceCharacter(userLoginArgs.Email, userLoginArgs.Password); !ok {
+// 		userLoginResult.Result.Success = false
+// 		userLoginResult.Result.ErrorCode = utils.ERR0304
+// 		userLoginResult.Result.ErrorDescription = utils.ERR0304.ToDescription()
 
-		return api.WriteJSON(w, http.StatusOK, userLoginResult)
-	}
+// 		return api.WriteJSON(w, http.StatusOK, userLoginResult)
+// 	}
 
-	if ok := utils.ValidateEmail(userLoginArgs.Email); !ok {
-		userLoginResult.Result.Success = false
-		userLoginResult.Result.ErrorCode = utils.ERR0304
-		userLoginResult.Result.ErrorDescription = utils.ERR0304.ToDescription()
+// 	if ok := utils.ValidateEmail(userLoginArgs.Email); !ok {
+// 		userLoginResult.Result.Success = false
+// 		userLoginResult.Result.ErrorCode = utils.ERR0304
+// 		userLoginResult.Result.ErrorDescription = utils.ERR0304.ToDescription()
 
-		return api.WriteJSON(w, http.StatusOK, userLoginResult)
-	}
+// 		return api.WriteJSON(w, http.StatusOK, userLoginResult)
+// 	}
 
-	if ok := utils.ValidatePassword(userLoginArgs.Password); !ok {
-		userLoginResult.Result.Success = false
-		userLoginResult.Result.ErrorCode = utils.ERR0304
-		userLoginResult.Result.ErrorDescription = utils.ERR0304.ToDescription()
+// 	if ok := utils.ValidatePassword(userLoginArgs.Password); !ok {
+// 		userLoginResult.Result.Success = false
+// 		userLoginResult.Result.ErrorCode = utils.ERR0304
+// 		userLoginResult.Result.ErrorDescription = utils.ERR0304.ToDescription()
 
-		return api.WriteJSON(w, http.StatusOK, userLoginResult)
-	}
+// 		return api.WriteJSON(w, http.StatusOK, userLoginResult)
+// 	}
 
-	model := database.Model[models.UserModel]{
-		Stg: controller.Storage.GetCursor(),
-	}
-	result, err := model.Get(fmt.Sprintf("email = %s", userLoginArgs.Email))
-	if err != nil {
-		userLoginResult.Result.Success = false
-		userLoginResult.Result.ErrorCode = utils.ERR0402
-		userLoginResult.Result.ErrorDescription = utils.ERR0402.ToDescription()
-		userLoginResult.Result.ErrorException = utils.ExceptionToString(err)
+// 	model := database.Model[models.UserModel]{
+// 		Stg: controller.Storage.GetCursor(),
+// 	}
+// 	result, err := model.Get(fmt.Sprintf("email = %s", userLoginArgs.Email))
+// 	if err != nil {
+// 		userLoginResult.Result.Success = false
+// 		userLoginResult.Result.ErrorCode = utils.ERR0402
+// 		userLoginResult.Result.ErrorDescription = utils.ERR0402.ToDescription()
+// 		userLoginResult.Result.ErrorException = utils.ExceptionToString(err)
 
-		return api.WriteJSON(w, http.StatusOK, userLoginResult)
-	}
+// 		return api.WriteJSON(w, http.StatusOK, userLoginResult)
+// 	}
 
-	if ok := utils.CompareHashAndPassword(result.Password, userLoginArgs.Password); !ok {
-		userLoginResult.Result.Success = false
-		userLoginResult.Result.ErrorCode = utils.ERR0403
-		userLoginResult.Result.ErrorDescription = utils.ERR0403.ToDescription()
-		userLoginResult.Result.ErrorException = utils.ExceptionToString(err)
+// 	if ok := utils.CompareHashAndPassword(result.Password, userLoginArgs.Password); !ok {
+// 		userLoginResult.Result.Success = false
+// 		userLoginResult.Result.ErrorCode = utils.ERR0403
+// 		userLoginResult.Result.ErrorDescription = utils.ERR0403.ToDescription()
+// 		userLoginResult.Result.ErrorException = utils.ExceptionToString(err)
 
-		return api.WriteJSON(w, http.StatusOK, userLoginResult)
-	}
+// 		return api.WriteJSON(w, http.StatusOK, userLoginResult)
+// 	}
 
-	token, err := utils.CreateJSONWebToken()
-	if err != nil {
-		userLoginResult.Result.Success = false
-		userLoginResult.Result.ErrorCode = utils.ERR0405
-		userLoginResult.Result.ErrorDescription = utils.ERR0405.ToDescription()
-		userLoginResult.Result.ErrorException = utils.ExceptionToString(err)
+// 	token, err := utils.CreateJSONWebToken()
+// 	if err != nil {
+// 		userLoginResult.Result.Success = false
+// 		userLoginResult.Result.ErrorCode = utils.ERR0405
+// 		userLoginResult.Result.ErrorDescription = utils.ERR0405.ToDescription()
+// 		userLoginResult.Result.ErrorException = utils.ExceptionToString(err)
 
-		return api.WriteJSON(w, http.StatusOK, userLoginResult)
-	}
+// 		return api.WriteJSON(w, http.StatusOK, userLoginResult)
+// 	}
 
-	userLoginResult.Id = result.Id
-	userLoginResult.AuthenticationToken = token
-	userLoginResult.UserInfos = map[string]string{
-		"full_name":    result.FirstName + " " + result.LastName,
-		"phone_number": result.PhoneNumber,
-		"email":        result.Email,
-	}
+// 	userLoginResult.Id = result.Id
+// 	userLoginResult.AuthenticationToken = token
+// 	userLoginResult.UserInfos = map[string]string{
+// 		"full_name":    result.FirstName + " " + result.LastName,
+// 		"phone_number": result.PhoneNumber,
+// 		"email":        result.Email,
+// 	}
 
-	userLoginResult.Result.Success = true
-	userLoginResult.Result.ErrorCode = ""
-	userLoginResult.Result.ErrorDescription = ""
-	userLoginResult.Result.ErrorException = ""
+// 	userLoginResult.Result.Success = true
+// 	userLoginResult.Result.ErrorCode = ""
+// 	userLoginResult.Result.ErrorDescription = ""
+// 	userLoginResult.Result.ErrorException = ""
 
-	return api.WriteJSON(w, http.StatusOK, userLoginResult)
-}
+// 	return api.WriteJSON(w, http.StatusOK, userLoginResult)
+// }
 
-// TokenCheck  		TokenValidate godoc
-// @Summary      	Check validity of token
-// @Description  	Token check method for authentication
-// @Tags         	Auth
-// @Accept       	json
-// @Produce      	json
-// @Param        	tokenCheckArgs 		body 		models.TokenCheckArgs 	true 	"TokenCheck"
-// @Success      	200  				{object}  	models.TokenCheckResult
-// @Security  		Bearer
-// @Router       	/api/users/token-check [post]
-func TokenCheck(w http.ResponseWriter, r *http.Request) error {
-	if r.Method != http.MethodPost {
-	 return fmt.Errorf("method not allowed %s", r.Method)
-	}
+// // TokenCheck  		TokenValidate godoc
+// // @Summary      	Check validity of token
+// // @Description  	Token check method for authentication
+// // @Tags         	Auth
+// // @Accept       	json
+// // @Produce      	json
+// // @Param        	tokenCheckArgs 		body 		models.TokenCheckArgs 	true 	"TokenCheck"
+// // @Success      	200  				{object}  	models.TokenCheckResult
+// // @Security  		Bearer
+// // @Router       	/api/users/token-check [post]
+// func TokenCheck(w http.ResponseWriter, r *http.Request) error {
+// 	if r.Method != http.MethodPost {
+// 	 return fmt.Errorf("method not allowed %s", r.Method)
+// 	}
    
-	tokenCheckArgs := new(models.TokenCheckArgs)
-	tokenCheckResult := new(models.TokenCheckResult)
+// 	tokenCheckArgs := new(models.TokenCheckArgs)
+// 	tokenCheckResult := new(models.TokenCheckResult)
    
-	if err := json.NewDecoder(r.Body).Decode(tokenCheckArgs); err != nil {
-	 tokenCheckResult.Result.Success = false
-	 tokenCheckResult.Result.ErrorCode = utils.ERR0401
-	 tokenCheckResult.Result.ErrorDescription = utils.ERR0401.ToDescription()
-	 tokenCheckResult.Result.ErrorException = utils.ExceptionToString(err)
+// 	if err := json.NewDecoder(r.Body).Decode(tokenCheckArgs); err != nil {
+// 	 tokenCheckResult.Result.Success = false
+// 	 tokenCheckResult.Result.ErrorCode = utils.ERR0401
+// 	 tokenCheckResult.Result.ErrorDescription = utils.ERR0401.ToDescription()
+// 	 tokenCheckResult.Result.ErrorException = utils.ExceptionToString(err)
    
-	 return api.WriteJSON(w, http.StatusOK, tokenCheckResult)
-	}
+// 	 return api.WriteJSON(w, http.StatusOK, tokenCheckResult)
+// 	}
    
-	tokenCheckResult.ServerTime = time.Now().UTC()
-	tokenCheckResult.ClientTime = tokenCheckArgs.ClientTime
-	tokenCheckResult.Result.Success = true
-	tokenCheckResult.Result.ErrorCode = ""
-	tokenCheckResult.Result.ErrorDescription = ""
+// 	tokenCheckResult.ServerTime = time.Now().UTC()
+// 	tokenCheckResult.ClientTime = tokenCheckArgs.ClientTime
+// 	tokenCheckResult.Result.Success = true
+// 	tokenCheckResult.Result.ErrorCode = ""
+// 	tokenCheckResult.Result.ErrorDescription = ""
    
-	return api.WriteJSON(w, http.StatusOK, tokenCheckResult)
-   }
+// 	return api.WriteJSON(w, http.StatusOK, tokenCheckResult)
+//    }
 
 // @Summary        create new user
 // @Description    Creating User in DB with given request body
