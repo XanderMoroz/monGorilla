@@ -22,6 +22,10 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
+// @SecurityDefinitions.apiKey Bearer
+// @in header
+// @name Authorization
+
 // @host 127.0.0.1:8080/
 // // @BasePath /v1
 func main() {

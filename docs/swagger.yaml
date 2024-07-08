@@ -12,6 +12,31 @@ definitions:
     - name
     - title
     type: object
+  models.Result:
+    properties:
+      error_code:
+        $ref: '#/definitions/utils.Error'
+      error_description:
+        type: string
+      error_exception:
+        type: string
+      success:
+        type: boolean
+    type: object
+  models.TokenCheckArgs:
+    properties:
+      client_time:
+        type: string
+    type: object
+  models.TokenCheckResult:
+    properties:
+      client_time:
+        type: string
+      result:
+        $ref: '#/definitions/models.Result'
+      server_time:
+        type: string
+    type: object
   models.User:
     properties:
       id:
@@ -27,6 +52,70 @@ definitions:
     - name
     - title
     type: object
+  models.UserLoginArgs:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  models.UserLoginResult:
+    properties:
+      authentication_token:
+        type: string
+      id:
+        type: string
+      result:
+        $ref: '#/definitions/models.Result'
+      user_infos:
+        additionalProperties:
+          type: string
+        type: object
+    type: object
+  models.UserRegisterArgs:
+    properties:
+      birth_date:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      password:
+        type: string
+      phone_number:
+        type: string
+      validate_password:
+        type: string
+    type: object
+  models.UserRegisterResult:
+    properties:
+      result:
+        $ref: '#/definitions/models.Result'
+    type: object
+  utils.Error:
+    enum:
+    - ERR0303
+    - ERR0304
+    - ERR0401
+    - ERR0402
+    - ERR0403
+    - ERR0404
+    - ERR0405
+    - ERR0406
+    - ERR0407
+    type: string
+    x-enum-varnames:
+    - ERR0303
+    - ERR0304
+    - ERR0401
+    - ERR0402
+    - ERR0403
+    - ERR0404
+    - ERR0405
+    - ERR0406
+    - ERR0407
 host: 127.0.0.1:8080/
 info:
   contact:
@@ -45,6 +134,13 @@ paths:
     get:
       description: Get all users from db
       operationId: get-all-users
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your access token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -169,4 +265,77 @@ paths:
       summary: update user by ID
       tags:
       - Users
+  /api/users/login:
+    post:
+      consumes:
+      - application/json
+      description: Login with username and password
+      parameters:
+      - description: UserLogin
+        in: body
+        name: userModelArgs
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserLoginArgs'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserLoginResult'
+      summary: Login to your account
+      tags:
+      - Auth
+  /api/users/register:
+    post:
+      consumes:
+      - application/json
+      description: Register and create account
+      parameters:
+      - description: UserRegister
+        in: body
+        name: userModelArgs
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserRegisterArgs'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserRegisterResult'
+      summary: Create a account
+      tags:
+      - Auth
+  /api/users/token-check:
+    post:
+      consumes:
+      - application/json
+      description: Token check method for authentication
+      parameters:
+      - description: TokenCheck
+        in: body
+        name: tokenCheckArgs
+        required: true
+        schema:
+          $ref: '#/definitions/models.TokenCheckArgs'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TokenCheckResult'
+      security:
+      - Bearer: []
+      summary: Check validity of token
+      tags:
+      - Auth
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

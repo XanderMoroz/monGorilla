@@ -28,6 +28,16 @@
                 ],
                 "summary": "get all users",
                 "operationId": "get-all-users",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -75,6 +85,113 @@
                         "description": "Bad Request",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/login": {
+            "post": {
+                "description": "Login with username and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login to your account",
+                "parameters": [
+                    {
+                        "description": "UserLogin",
+                        "name": "userModelArgs",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserLoginArgs"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.UserLoginResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/register": {
+            "post": {
+                "description": "Register and create account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Create a account",
+                "parameters": [
+                    {
+                        "description": "UserRegister",
+                        "name": "userModelArgs",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserRegisterArgs"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.UserRegisterResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/token-check": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Token check method for authentication",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Check validity of token",
+                "parameters": [
+                    {
+                        "description": "TokenCheck",
+                        "name": "tokenCheckArgs",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.TokenCheckArgs"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.TokenCheckResult"
                         }
                     }
                 }
@@ -229,6 +346,45 @@
                 }
             }
         },
+        "models.Result": {
+            "type": "object",
+            "properties": {
+                "error_code": {
+                    "$ref": "#/definitions/utils.Error"
+                },
+                "error_description": {
+                    "type": "string"
+                },
+                "error_exception": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.TokenCheckArgs": {
+            "type": "object",
+            "properties": {
+                "client_time": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.TokenCheckResult": {
+            "type": "object",
+            "properties": {
+                "client_time": {
+                    "type": "string"
+                },
+                "result": {
+                    "$ref": "#/definitions/models.Result"
+                },
+                "server_time": {
+                    "type": "string"
+                }
+            }
+        },
         "models.User": {
             "type": "object",
             "required": [
@@ -250,6 +406,103 @@
                     "type": "string"
                 }
             }
+        },
+        "models.UserLoginArgs": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserLoginResult": {
+            "type": "object",
+            "properties": {
+                "authentication_token": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "result": {
+                    "$ref": "#/definitions/models.Result"
+                },
+                "user_infos": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "models.UserRegisterArgs": {
+            "type": "object",
+            "properties": {
+                "birth_date": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "validate_password": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UserRegisterResult": {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "$ref": "#/definitions/models.Result"
+                }
+            }
+        },
+        "utils.Error": {
+            "type": "string",
+            "enum": [
+                "ERR0303",
+                "ERR0304",
+                "ERR0401",
+                "ERR0402",
+                "ERR0403",
+                "ERR0404",
+                "ERR0405",
+                "ERR0406",
+                "ERR0407"
+            ],
+            "x-enum-varnames": [
+                "ERR0303",
+                "ERR0304",
+                "ERR0401",
+                "ERR0402",
+                "ERR0403",
+                "ERR0404",
+                "ERR0405",
+                "ERR0406",
+                "ERR0407"
+            ]
+        }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }
