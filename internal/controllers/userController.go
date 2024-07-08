@@ -14,6 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/XanderMoroz/mongoMovies/configs"
+	"github.com/XanderMoroz/mongoMovies/internal/api"
 	"github.com/XanderMoroz/mongoMovies/internal/utils"
 	"github.com/XanderMoroz/mongoMovies/internal/models"
 )

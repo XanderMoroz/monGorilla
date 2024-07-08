@@ -3,6 +3,7 @@ module github.com/XanderMoroz/mongoMovies
 go 1.20
 
 require (
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/gorilla/mux v1.8.1
 	github.com/swaggo/swag v1.16.3
 	go.mongodb.org/mongo-driver v1.15.1
