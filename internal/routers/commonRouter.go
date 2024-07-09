@@ -24,8 +24,9 @@ func CommonRouter() *mux.Router {
 	)).Methods(http.MethodGet)
 
 	// User routes
-	router.HandleFunc("/api/users/register", controllers.CreateUser).Methods("POST")
-	router.HandleFunc("/api/users", controllers.CreateUser).Methods("POST")
+	router.HandleFunc("/api/users/register", controllers.Register).Methods("POST")
+
+	// router.HandleFunc("/api/users", controllers.CreateUser).Methods("POST")
 	router.HandleFunc("/api/users/{id}", controllers.GetUserByID).Methods("GET")
 	router.HandleFunc("/api/users", controllers.GetAllUsers).Methods("GET")
 	router.HandleFunc("/api/users/{id}", controllers.UpdateUserByID).Methods("PUT")

@@ -97,40 +97,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/users/login": {
-            "post": {
-                "description": "Login with username and password",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Login to your account",
-                "parameters": [
-                    {
-                        "description": "UserLogin",
-                        "name": "userModelArgs",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.UserLoginArgs"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.UserLoginResult"
-                        }
-                    }
-                }
-            }
-        },
         "/api/users/register": {
             "post": {
                 "description": "Register and create account",
@@ -160,45 +126,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/models.UserRegisterResult"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/users/token-check": {
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "Token check method for authentication",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Check validity of token",
-                "parameters": [
-                    {
-                        "description": "TokenCheck",
-                        "name": "tokenCheckArgs",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.TokenCheckArgs"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.TokenCheckResult"
                         }
                     }
                 }
@@ -370,28 +297,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.TokenCheckArgs": {
-            "type": "object",
-            "properties": {
-                "client_time": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.TokenCheckResult": {
-            "type": "object",
-            "properties": {
-                "client_time": {
-                    "type": "string"
-                },
-                "result": {
-                    "$ref": "#/definitions/models.Result"
-                },
-                "server_time": {
-                    "type": "string"
-                }
-            }
-        },
         "models.User": {
             "type": "object",
             "required": [
@@ -414,43 +319,9 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UserLoginArgs": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.UserLoginResult": {
-            "type": "object",
-            "properties": {
-                "authentication_token": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "result": {
-                    "$ref": "#/definitions/models.Result"
-                },
-                "user_infos": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
         "models.UserRegisterArgs": {
             "type": "object",
             "properties": {
-                "birth_date": {
-                    "type": "string"
-                },
                 "email": {
                     "type": "string"
                 },

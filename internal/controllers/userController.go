@@ -1,13 +1,14 @@
 package controllers
 
 import (
-	"encoding/json"
 	"context"
+	"encoding/json"
 	"net/http"
+
 	// "reflect"
-	"time"
-	"fmt"
+
 	"log"
+	"time"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,13 +16,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/XanderMoroz/mongoMovies/configs"
-	"github.com/XanderMoroz/mongoMovies/internal/api"
-	"github.com/XanderMoroz/mongoMovies/internal/utils"
 	"github.com/XanderMoroz/mongoMovies/internal/models"
+	"github.com/XanderMoroz/mongoMovies/internal/utils"
 )
 
 var userCollection *mongo.Collection = configs.GetCollection(configs.DB, "users")
-
 
 // Register		 RegisterAccount godoc
 // @Summary      Create a account
@@ -32,23 +31,31 @@ var userCollection *mongo.Collection = configs.GetCollection(configs.DB, "users"
 // @Param        userModelArgs 			body 			models.UserRegisterArgs true "UserRegister"
 // @Success      200  					{object}  		models.UserRegisterResult
 // @Router       /api/users/register 	[post]
-func Register(w http.ResponseWriter, r *http.Request) error {
-	if r.Method != http.MethodPost {
-		return fmt.Errorf("method not allowed %s", r.Method)
-	}
+func Register(w http.ResponseWriter, r *http.Request) {
+	// if r.Method != http.MethodPost {
+	// 	return fmt.Errorf("method not allowed %s", r.Method)
+	// }
+
+	log.Println("Поступил запрос на регистрацию пользователя")
 
 	userRegisterArgs := new(models.UserRegisterArgs)
 	userRegisterResult := new(models.UserRegisterResult)
 
+	log.Println("Извлекаем тело запроса...")
 	if err := json.NewDecoder(r.Body).Decode(userRegisterArgs); err != nil {
 		userRegisterResult.Result.Success = false
 		userRegisterResult.Result.ErrorCode = utils.ERR0303
 		userRegisterResult.Result.ErrorDescription = utils.ERR0303.ToDescription()
 		userRegisterResult.Result.ErrorException = utils.ExceptionToString(err)
-
-		return api.WriteJSON(w, http.StatusOK, userRegisterResult)
+		log.Println("При извлечении тела запроса - произошла ошибка:", userRegisterResult)
+		json.NewEncoder(w).Encode(userRegisterResult)
+		return
+	} else {
+		log.Println("...успешно")
+		log.Println("Тело запроса", userRegisterArgs)
 	}
 
+	log.Println("Валидируем тело запроса...")
 	if ok := utils.ValidateCheckSpaceCharacter(
 		userRegisterArgs.FirstName,
 		userRegisterArgs.LastName,
@@ -56,91 +63,98 @@ func Register(w http.ResponseWriter, r *http.Request) error {
 		userRegisterArgs.Password,
 		userRegisterArgs.ValidatePassword,
 		userRegisterArgs.PhoneNumber,
-		userRegisterArgs.BirthDate.GoString(),
+		// userRegisterArgs.BirthDate.GoString(),
 	); !ok {
 		userRegisterResult.Result.Success = false
 		userRegisterResult.Result.ErrorCode = utils.ERR0304
 		userRegisterResult.Result.ErrorDescription = utils.ERR0304.ToDescription()
-
-		return api.WriteJSON(w, http.StatusOK, userRegisterResult)
+		log.Println("При валидации тела запроса - произошла ошибка:", userRegisterResult)
+		json.NewEncoder(w).Encode(userRegisterResult)
+		return
+	} else {
+		log.Println("...успешно")
 	}
 
+	log.Println("Сравниваем пароли...")
 	if ok := utils.IsStringEqual(userRegisterArgs.Password, userRegisterArgs.ValidatePassword); !ok {
 		userRegisterResult.Result.Success = false
 		userRegisterResult.Result.ErrorCode = utils.ERR0406
 		userRegisterResult.Result.ErrorDescription = utils.ERR0406.ToDescription()
-
-		return api.WriteJSON(w, http.StatusOK, userRegisterResult)
+		json.NewEncoder(w).Encode(userRegisterResult)
+		return
+	} else {
+		log.Println("...успешно")
 	}
 
+	log.Println("Валидируем Email...")
 	if ok := utils.ValidateEmail(userRegisterArgs.Email); !ok {
 		userRegisterResult.Result.Success = false
 		userRegisterResult.Result.ErrorCode = utils.ERR0304
 		userRegisterResult.Result.ErrorDescription = utils.ERR0304.ToDescription()
-
-		return api.WriteJSON(w, http.StatusOK, userRegisterResult)
+		json.NewEncoder(w).Encode(userRegisterResult)
+		return
+	} else {
+		log.Println("...успешно")
 	}
 
+	log.Println("Валидируем пароль...")
 	if ok := utils.ValidatePassword(userRegisterArgs.Password); !ok {
 		userRegisterResult.Result.Success = false
 		userRegisterResult.Result.ErrorCode = utils.ERR0304
 		userRegisterResult.Result.ErrorDescription = utils.ERR0304.ToDescription()
-
-		return api.WriteJSON(w, http.StatusOK, userRegisterResult)
+		json.NewEncoder(w).Encode(userRegisterResult)
+		return
+	} else {
+		log.Println("...успешно")
 	}
 
-	// checking_models := database.Model[models.UserModel]{
-	// 	Stg: controller.Storage.GetCursor(),
-	// }
-	// result, err := checking_models.Get(
-	// 	fmt.Sprintf(
-	// 		"email = %s OR phone_number = %s",
-	// 		userRegisterArgs.Email, userRegisterArgs.PhoneNumber),
-	// )
-	// if err != nil || !reflect.DeepEqual(result, models.UserModel{}) {
-	// 	userRegisterResult.Result.Success = false
-	// 	userRegisterResult.Result.ErrorCode = utils.ERR0404
-	// 	userRegisterResult.Result.ErrorDescription = utils.ERR0404.ToDescription()
-	// 	userRegisterResult.Result.ErrorException = utils.ExceptionToString(err)
+	log.Printf("Поступил запрос на извлечение записи по first_name: <%s>\n", userRegisterArgs.FirstName)
 
-	// 	return api.WriteJSON(w, http.StatusOK, userRegisterResult)
-	// }
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	// userId := params["id"]
+	var user models.UserModel
+	defer cancel()
+	firstName := userRegisterArgs.FirstName
+	// objId, _ := primitive.ObjectIDFromHex(userId)
 
-	// hashed_password, err := utils.HashPassword(userRegisterArgs.Password)
-	// if err != nil {
-	// 	userRegisterResult.Result.Success = false
-	// 	userRegisterResult.Result.ErrorCode = utils.ERR0405
-	// 	userRegisterResult.Result.ErrorDescription = utils.ERR0405.ToDescription()
-	// 	userRegisterResult.Result.ErrorException = utils.ExceptionToString(err)
+	err := userCollection.FindOne(ctx, bson.M{"first_name": firstName}).Decode(&user)
+	if err != nil {
+		log.Printf("Результат: <%v>\n", err.Error())
+		// http.Error(w, err.Error(), http.StatusBadRequest)
+	} else {
+		log.Printf("Запись успешно извлечена: <%+v>\n", user)
+	}
 
-	// 	return api.WriteJSON(w, http.StatusOK, userRegisterResult)
-	// }
+	hashed_password, err := utils.HashPassword(userRegisterArgs.Password)
+	if err != nil {
+		userRegisterResult.Result.Success = false
+		userRegisterResult.Result.ErrorCode = utils.ERR0405
+		userRegisterResult.Result.ErrorDescription = utils.ERR0405.ToDescription()
+		userRegisterResult.Result.ErrorException = utils.ExceptionToString(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-	// to_register := new(models.UserModel)
-	// to_register.Id = utils.NewID()
-	// to_register.FirstName = userRegisterArgs.FirstName
-	// to_register.LastName = userRegisterArgs.LastName
-	// to_register.Email = userRegisterArgs.Email
-	// to_register.PhoneNumber = userRegisterArgs.PhoneNumber
-	// to_register.Password = hashed_password
+	to_register := new(models.UserModel)
+	to_register.Id = primitive.NewObjectID()
+	to_register.FirstName = userRegisterArgs.FirstName
+	to_register.LastName = userRegisterArgs.LastName
+	to_register.Email = userRegisterArgs.Email
+	to_register.PhoneNumber = userRegisterArgs.PhoneNumber
+	to_register.Password = hashed_password
 
-	// if err := checking_models.Insert(*to_register); err != nil {
-	// 	userRegisterResult.Result.Success = false
-	// 	userRegisterResult.Result.ErrorCode = utils.ERR0407
-	// 	userRegisterResult.Result.ErrorDescription = utils.ERR0407.ToDescription()
-	// 	userRegisterResult.Result.ErrorException = utils.ExceptionToString(err)
+	result, err := userCollection.InsertOne(ctx, to_register)
+	if err != nil {
+		log.Printf("При добавлении новой записи - Произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	} else {
+		log.Println("Новая запись успешно добавлена:")
+		log.Printf("ID новой записи: %v", result.InsertedID)
+	}
 
-	// 	return api.WriteJSON(w, http.StatusOK, userRegisterResult)
-	// }
-
-	// userRegisterResult.Result.Success = true
-	// userRegisterResult.Result.ErrorCode = ""
-	// userRegisterResult.Result.ErrorDescription = ""
-
-	// return api.WriteJSON(w, http.StatusOK, userRegisterResult)
-	return nil
+	json.NewEncoder(w).Encode(to_register)
 }
-
 
 // // Login   LoginAccount godoc
 // // @Summary      Login to your account
@@ -255,25 +269,25 @@ func Register(w http.ResponseWriter, r *http.Request) error {
 // 	if r.Method != http.MethodPost {
 // 	 return fmt.Errorf("method not allowed %s", r.Method)
 // 	}
-   
+
 // 	tokenCheckArgs := new(models.TokenCheckArgs)
 // 	tokenCheckResult := new(models.TokenCheckResult)
-   
+
 // 	if err := json.NewDecoder(r.Body).Decode(tokenCheckArgs); err != nil {
 // 	 tokenCheckResult.Result.Success = false
 // 	 tokenCheckResult.Result.ErrorCode = utils.ERR0401
 // 	 tokenCheckResult.Result.ErrorDescription = utils.ERR0401.ToDescription()
 // 	 tokenCheckResult.Result.ErrorException = utils.ExceptionToString(err)
-   
+
 // 	 return api.WriteJSON(w, http.StatusOK, tokenCheckResult)
 // 	}
-   
+
 // 	tokenCheckResult.ServerTime = time.Now().UTC()
 // 	tokenCheckResult.ClientTime = tokenCheckArgs.ClientTime
 // 	tokenCheckResult.Result.Success = true
 // 	tokenCheckResult.Result.ErrorCode = ""
 // 	tokenCheckResult.Result.ErrorDescription = ""
-   
+
 // 	return api.WriteJSON(w, http.StatusOK, tokenCheckResult)
 //    }
 

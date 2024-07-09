@@ -23,20 +23,6 @@ definitions:
       success:
         type: boolean
     type: object
-  models.TokenCheckArgs:
-    properties:
-      client_time:
-        type: string
-    type: object
-  models.TokenCheckResult:
-    properties:
-      client_time:
-        type: string
-      result:
-        $ref: '#/definitions/models.Result'
-      server_time:
-        type: string
-    type: object
   models.User:
     properties:
       id:
@@ -52,30 +38,8 @@ definitions:
     - name
     - title
     type: object
-  models.UserLoginArgs:
-    properties:
-      email:
-        type: string
-      password:
-        type: string
-    type: object
-  models.UserLoginResult:
-    properties:
-      authentication_token:
-        type: string
-      id:
-        type: string
-      result:
-        $ref: '#/definitions/models.Result'
-      user_infos:
-        additionalProperties:
-          type: string
-        type: object
-    type: object
   models.UserRegisterArgs:
     properties:
-      birth_date:
-        type: string
       email:
         type: string
       first_name:
@@ -265,28 +229,6 @@ paths:
       summary: update user by ID
       tags:
       - Users
-  /api/users/login:
-    post:
-      consumes:
-      - application/json
-      description: Login with username and password
-      parameters:
-      - description: UserLogin
-        in: body
-        name: userModelArgs
-        required: true
-        schema:
-          $ref: '#/definitions/models.UserLoginArgs'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.UserLoginResult'
-      summary: Login to your account
-      tags:
-      - Auth
   /api/users/register:
     post:
       consumes:
@@ -307,30 +249,6 @@ paths:
           schema:
             $ref: '#/definitions/models.UserRegisterResult'
       summary: Create a account
-      tags:
-      - Auth
-  /api/users/token-check:
-    post:
-      consumes:
-      - application/json
-      description: Token check method for authentication
-      parameters:
-      - description: TokenCheck
-        in: body
-        name: tokenCheckArgs
-        required: true
-        schema:
-          $ref: '#/definitions/models.TokenCheckArgs'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.TokenCheckResult'
-      security:
-      - Bearer: []
-      summary: Check validity of token
       tags:
       - Auth
 securityDefinitions:

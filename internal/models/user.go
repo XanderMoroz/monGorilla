@@ -1,7 +1,6 @@
 package models
 
 import (
-	"time"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -18,13 +17,13 @@ type CreateUserBody struct {
 	Title    string `json:"title,omitempty" validate:"required"`
 }
 
-   type UserModel struct {
-	Id          string    `json:"id,omitempty"`
-	Password    string    `json:"password,omitempty"`
-	FirstName   string    `json:"first_name,omitempty"`
-	LastName    string    `json:"last_name,omitempty"`
-	PhoneNumber string    `json:"phone_number,omitempty"`
-	Email       string    `json:"email,omitempty"`
+type UserModel struct {
+	Id          primitive.ObjectID `json:"id,omitempty"`
+	Password    string             `json:"password,omitempty"`
+	FirstName   string             `json:"first_name,omitempty"`
+	LastName    string             `json:"last_name,omitempty"`
+	PhoneNumber string             `json:"phone_number,omitempty"`
+	Email       string             `json:"email,omitempty"`
 	// BirthDate   time.Time `json:"birth_date,omitempty"`
 }
 
@@ -44,13 +43,13 @@ type UserLoginResult struct {
 // -------------------------
 
 type UserRegisterArgs struct {
-	FirstName        string    `json:"first_name"`
-	LastName         string    `json:"last_name"`
-	PhoneNumber      string    `json:"phone_number"`
-	Email            string    `json:"email"`
-	BirthDate        time.Time `json:"birth_date"`
-	Password         string    `json:"password"`
-	ValidatePassword string    `json:"validate_password"`
+	FirstName        string `json:"first_name"`
+	LastName         string `json:"last_name"`
+	PhoneNumber      string `json:"phone_number"`
+	Email            string `json:"email"`
+	Password         string `json:"password"`
+	ValidatePassword string `json:"validate_password"`
+	// BirthDate        time.Time `json:"birth_date"`
 }
 
 type UserRegisterResult struct {

@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -12,7 +13,10 @@ import (
 )
 
 func ValidatePassword(password string) bool {
+
+	log.Printf("Начинаем валидацию пароля: <%s>", password)
 	if len(password) < 8 {
+		log.Printf("пароль меньше 8 знаков, так не пойдет")
 		return false
 	}
 
