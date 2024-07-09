@@ -34,10 +34,10 @@ type UserLoginArgs struct {
 }
 
 type UserLoginResult struct {
-	Id                  string            `json:"id"`
-	UserInfos           map[string]string `json:"user_infos"`
-	AuthenticationToken string            `json:"authentication_token"`
-	Result              Result            `json:"result"`
+	Id                  primitive.ObjectID `json:"id"`
+	UserInfos           map[string]string  `json:"user_infos"`
+	AuthenticationToken string             `json:"authentication_token"`
+	Result              Result             `json:"result"`
 }
 
 // -------------------------

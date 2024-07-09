@@ -63,7 +63,6 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		userRegisterArgs.Password,
 		userRegisterArgs.ValidatePassword,
 		userRegisterArgs.PhoneNumber,
-		// userRegisterArgs.BirthDate.GoString(),
 	); !ok {
 		userRegisterResult.Result.Success = false
 		userRegisterResult.Result.ErrorCode = utils.ERR0304
@@ -108,21 +107,22 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		log.Println("...успешно")
 	}
 
-	log.Printf("Поступил запрос на извлечение записи по first_name: <%s>\n", userRegisterArgs.FirstName)
+	log.Printf("Поступил запрос на извлечение записи по e-mail: <%s>\n", userRegisterArgs.Email)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	// userId := params["id"]
 	var user models.UserModel
 	defer cancel()
-	firstName := userRegisterArgs.FirstName
+	userEmail := userRegisterArgs.Email
 	// objId, _ := primitive.ObjectIDFromHex(userId)
 
-	err := userCollection.FindOne(ctx, bson.M{"first_name": firstName}).Decode(&user)
+	err := userCollection.FindOne(ctx, bson.M{"email": userEmail}).Decode(&user)
 	if err != nil {
 		log.Printf("Результат: <%v>\n", err.Error())
 		// http.Error(w, err.Error(), http.StatusBadRequest)
 	} else {
-		log.Printf("Запись успешно извлечена: <%+v>\n", user)
+		log.Printf("Такой email уже есть в БД: <%+v>\n", user)
+		return
 	}
 
 	hashed_password, err := utils.HashPassword(userRegisterArgs.Password)
@@ -156,104 +156,140 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(to_register)
 }
 
-// // Login   LoginAccount godoc
-// // @Summary      Login to your account
-// // @Description  Login with username and password
-// // @Tags         Auth
-// // @Accept       json
-// // @Produce      json
-// // @Param        userModelArgs 	body 		models.UserLoginArgs 	true 	"UserLogin"
-// // @Success      200  			{object}  	models.UserLoginResult
-// // @Router       /api/users/login [post]
-// func Login(w http.ResponseWriter, r *http.Request) error {
-// 	// Валидируем метод запроса
-// 	if r.Method != http.MethodPost {
-// 		return fmt.Errorf("method not allowed %s", r.Method)
-// 	}
+// Login   LoginAccount godoc
+// @Summary      Login to your account
+// @Description  Login with username and password
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        userModelArgs 	body 		models.UserLoginArgs 	true 	"UserLogin"
+// @Success      200  			{object}  	models.UserLoginResult
+// @Router       /api/users/login [post]
+func Login(w http.ResponseWriter, r *http.Request) {
+	// // Валидируем метод запроса
+	// if r.Method != http.MethodPost {
+	// 	return fmt.Errorf("method not allowed %s", r.Method)
+	// }
 
-// 	userLoginResult := new(models.UserLoginResult)
-// 	userLoginArgs := new(models.UserLoginArgs)
+	userLoginResult := new(models.UserLoginResult)
+	userLoginArgs := new(models.UserLoginArgs)
 
-// 	if err := json.NewDecoder(r.Body).Decode(userLoginArgs); err != nil {
-// 		userLoginResult.Result.Success = false
-// 		userLoginResult.Result.ErrorCode = utils.ERR0303
-// 		userLoginResult.Result.ErrorDescription = utils.ERR0303.ToDescription()
-// 		userLoginResult.Result.ErrorException = utils.ExceptionToString(err)
+	log.Println("Извлекаем тело запроса...")
+	if err := json.NewDecoder(r.Body).Decode(userLoginArgs); err != nil {
+		userLoginResult.Result.Success = false
+		userLoginResult.Result.ErrorCode = utils.ERR0303
+		userLoginResult.Result.ErrorDescription = utils.ERR0303.ToDescription()
+		userLoginResult.Result.ErrorException = utils.ExceptionToString(err)
+		json.NewEncoder(w).Encode(userLoginResult)
+		return
+	} else {
+		log.Println("...успешно")
+		log.Println("Тело запроса", userLoginArgs)
+	}
 
-// 		return api.WriteJSON(w, http.StatusOK, userLoginResult)
-// 	}
+	log.Println("Валидируем тело запроса...")
+	if ok := utils.ValidateCheckSpaceCharacter(userLoginArgs.Email, userLoginArgs.Password); !ok {
+		userLoginResult.Result.Success = false
+		userLoginResult.Result.ErrorCode = utils.ERR0304
+		userLoginResult.Result.ErrorDescription = utils.ERR0304.ToDescription()
+		json.NewEncoder(w).Encode(userLoginResult)
+		return
+	} else {
+		log.Println("...успешно")
+	}
 
-// 	if ok := utils.ValidateCheckSpaceCharacter(userLoginArgs.Email, userLoginArgs.Password); !ok {
-// 		userLoginResult.Result.Success = false
-// 		userLoginResult.Result.ErrorCode = utils.ERR0304
-// 		userLoginResult.Result.ErrorDescription = utils.ERR0304.ToDescription()
+	log.Println("Валидируем Email...")
+	if ok := utils.ValidateEmail(userLoginArgs.Email); !ok {
+		userLoginResult.Result.Success = false
+		userLoginResult.Result.ErrorCode = utils.ERR0304
+		userLoginResult.Result.ErrorDescription = utils.ERR0304.ToDescription()
+		json.NewEncoder(w).Encode(userLoginResult)
+		return
+	} else {
+		log.Println("...успешно")
+	}
 
-// 		return api.WriteJSON(w, http.StatusOK, userLoginResult)
-// 	}
+	log.Println("Валидируем пароль...")
+	if ok := utils.ValidatePassword(userLoginArgs.Password); !ok {
+		userLoginResult.Result.Success = false
+		userLoginResult.Result.ErrorCode = utils.ERR0304
+		userLoginResult.Result.ErrorDescription = utils.ERR0304.ToDescription()
+		json.NewEncoder(w).Encode(userLoginResult)
+		return
+	} else {
+		log.Println("...успешно")
+	}
 
-// 	if ok := utils.ValidateEmail(userLoginArgs.Email); !ok {
-// 		userLoginResult.Result.Success = false
-// 		userLoginResult.Result.ErrorCode = utils.ERR0304
-// 		userLoginResult.Result.ErrorDescription = utils.ERR0304.ToDescription()
+	log.Printf("Поступил запрос на извлечение записи по e-mail: <%s>\n", userLoginArgs.Email)
 
-// 		return api.WriteJSON(w, http.StatusOK, userLoginResult)
-// 	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	// userId := params["id"]
+	var user models.UserModel
+	defer cancel()
+	userEmail := userLoginArgs.Email
+	// objId, _ := primitive.ObjectIDFromHex(userId)
 
-// 	if ok := utils.ValidatePassword(userLoginArgs.Password); !ok {
-// 		userLoginResult.Result.Success = false
-// 		userLoginResult.Result.ErrorCode = utils.ERR0304
-// 		userLoginResult.Result.ErrorDescription = utils.ERR0304.ToDescription()
+	err := userCollection.FindOne(ctx, bson.M{"email": userEmail}).Decode(&user)
+	if err != nil {
+		log.Printf("Результат: <%v>\n", err.Error())
+		// http.Error(w, err.Error(), http.StatusBadRequest)
+	} else {
+		log.Printf("Такой email уже есть в БД: <%+v>\n", user)
+	}
 
-// 		return api.WriteJSON(w, http.StatusOK, userLoginResult)
-// 	}
+	// model := database.Model[models.UserModel]{
+	// 	Stg: controller.Storage.GetCursor(),
+	// }
+	// result, err := model.Get(fmt.Sprintf("email = %s", userLoginArgs.Email))
+	// if err != nil {
+	// 	userLoginResult.Result.Success = false
+	// 	userLoginResult.Result.ErrorCode = utils.ERR0402
+	// 	userLoginResult.Result.ErrorDescription = utils.ERR0402.ToDescription()
+	// 	userLoginResult.Result.ErrorException = utils.ExceptionToString(err)
 
-// 	model := database.Model[models.UserModel]{
-// 		Stg: controller.Storage.GetCursor(),
-// 	}
-// 	result, err := model.Get(fmt.Sprintf("email = %s", userLoginArgs.Email))
-// 	if err != nil {
-// 		userLoginResult.Result.Success = false
-// 		userLoginResult.Result.ErrorCode = utils.ERR0402
-// 		userLoginResult.Result.ErrorDescription = utils.ERR0402.ToDescription()
-// 		userLoginResult.Result.ErrorException = utils.ExceptionToString(err)
+	// 	return api.WriteJSON(w, http.StatusOK, userLoginResult)
+	// }
 
-// 		return api.WriteJSON(w, http.StatusOK, userLoginResult)
-// 	}
+	log.Println("Сравниваем пароль и хэш...")
+	if ok := utils.CompareHashAndPassword(user.Password, userLoginArgs.Password); !ok {
+		userLoginResult.Result.Success = false
+		userLoginResult.Result.ErrorCode = utils.ERR0403
+		userLoginResult.Result.ErrorDescription = utils.ERR0403.ToDescription()
+		userLoginResult.Result.ErrorException = utils.ExceptionToString(err)
+		json.NewEncoder(w).Encode(userLoginResult)
+		return
+	} else {
+		log.Println("...успешно")
+	}
 
-// 	if ok := utils.CompareHashAndPassword(result.Password, userLoginArgs.Password); !ok {
-// 		userLoginResult.Result.Success = false
-// 		userLoginResult.Result.ErrorCode = utils.ERR0403
-// 		userLoginResult.Result.ErrorDescription = utils.ERR0403.ToDescription()
-// 		userLoginResult.Result.ErrorException = utils.ExceptionToString(err)
+	log.Println("Создаем токен...")
+	token, err := utils.CreateJSONWebToken()
+	if err != nil {
+		userLoginResult.Result.Success = false
+		userLoginResult.Result.ErrorCode = utils.ERR0405
+		userLoginResult.Result.ErrorDescription = utils.ERR0405.ToDescription()
+		userLoginResult.Result.ErrorException = utils.ExceptionToString(err)
+		json.NewEncoder(w).Encode(userLoginResult)
+		return
+	} else {
+		log.Println("...успешно")
+	}
 
-// 		return api.WriteJSON(w, http.StatusOK, userLoginResult)
-// 	}
+	userLoginResult.Id = user.Id
+	userLoginResult.AuthenticationToken = token
+	userLoginResult.UserInfos = map[string]string{
+		"full_name":    user.FirstName + " " + user.LastName,
+		"phone_number": user.PhoneNumber,
+		"email":        user.Email,
+	}
 
-// 	token, err := utils.CreateJSONWebToken()
-// 	if err != nil {
-// 		userLoginResult.Result.Success = false
-// 		userLoginResult.Result.ErrorCode = utils.ERR0405
-// 		userLoginResult.Result.ErrorDescription = utils.ERR0405.ToDescription()
-// 		userLoginResult.Result.ErrorException = utils.ExceptionToString(err)
+	userLoginResult.Result.Success = true
+	userLoginResult.Result.ErrorCode = ""
+	userLoginResult.Result.ErrorDescription = ""
+	userLoginResult.Result.ErrorException = ""
 
-// 		return api.WriteJSON(w, http.StatusOK, userLoginResult)
-// 	}
-
-// 	userLoginResult.Id = result.Id
-// 	userLoginResult.AuthenticationToken = token
-// 	userLoginResult.UserInfos = map[string]string{
-// 		"full_name":    result.FirstName + " " + result.LastName,
-// 		"phone_number": result.PhoneNumber,
-// 		"email":        result.Email,
-// 	}
-
-// 	userLoginResult.Result.Success = true
-// 	userLoginResult.Result.ErrorCode = ""
-// 	userLoginResult.Result.ErrorDescription = ""
-// 	userLoginResult.Result.ErrorException = ""
-
-// 	return api.WriteJSON(w, http.StatusOK, userLoginResult)
-// }
+	json.NewEncoder(w).Encode(userLoginResult)
+}
 
 // // TokenCheck  		TokenValidate godoc
 // // @Summary      	Check validity of token

@@ -38,6 +38,26 @@ definitions:
     - name
     - title
     type: object
+  models.UserLoginArgs:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  models.UserLoginResult:
+    properties:
+      authentication_token:
+        type: string
+      id:
+        type: string
+      result:
+        $ref: '#/definitions/models.Result'
+      user_infos:
+        additionalProperties:
+          type: string
+        type: object
+    type: object
   models.UserRegisterArgs:
     properties:
       email:
@@ -229,6 +249,28 @@ paths:
       summary: update user by ID
       tags:
       - Users
+  /api/users/login:
+    post:
+      consumes:
+      - application/json
+      description: Login with username and password
+      parameters:
+      - description: UserLogin
+        in: body
+        name: userModelArgs
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserLoginArgs'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserLoginResult'
+      summary: Login to your account
+      tags:
+      - Auth
   /api/users/register:
     post:
       consumes:
