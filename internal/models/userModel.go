@@ -12,7 +12,6 @@ type UserModel struct {
 	LastName    string             `json:"last_name,omitempty"`
 	PhoneNumber string             `json:"phone_number,omitempty"`
 	Email       string             `json:"email,omitempty"`
-	// BirthDate   time.Time `json:"birth_date,omitempty"`
 }
 
 // ------------ USER REGISTER ARGS & RESULT -------------

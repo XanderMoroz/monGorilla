@@ -6,9 +6,10 @@ import (
 
 // Represents user Recipe
 type RecipeModel struct {
-	Id     primitive.ObjectID `json:"id,omitempty"`
-	Title  string             `json:"title,omitempty"`
-	Stages []StageModel       `json:"stages,omitempty"`
+	Id          primitive.ObjectID `json:"id,omitempty"`
+	Title       string             `json:"title,omitempty"`
+	Stages      []StageModel       `json:"stages,omitempty"`
+	AuthorEmail string             `json:"author_email,omitempty"`
 }
 
 // Represents user model
@@ -20,6 +21,16 @@ type StageModel struct {
 
 // Represents user model
 type IngredientModel struct {
-	Subject   string `json:"password,omitempty"`
-	Condition string `json:"first_name,omitempty"`
+	Subject   string `json:"subject,omitempty"`
+	Condition string `json:"condition,omitempty"`
+}
+
+type RecipeCreateBody struct {
+	Title  string       `json:"title,omitempty"`
+	Stages []StageModel `json:"stages,omitempty"`
+}
+
+// Represents Result of creating recipe response Body
+type RecipeCreateResult struct {
+	Result Result `json:"result"`
 }

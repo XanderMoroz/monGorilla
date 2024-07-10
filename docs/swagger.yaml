@@ -1,4 +1,20 @@
 definitions:
+  models.IngredientModel:
+    properties:
+      condition:
+        type: string
+      subject:
+        type: string
+    type: object
+  models.RecipeCreateBody:
+    properties:
+      stages:
+        items:
+          $ref: '#/definitions/models.StageModel'
+        type: array
+      title:
+        type: string
+    type: object
   models.Result:
     properties:
       error_code:
@@ -9,6 +25,17 @@ definitions:
         type: string
       success:
         type: boolean
+    type: object
+  models.StageModel:
+    properties:
+      description:
+        type: string
+      ingredients:
+        items:
+          $ref: '#/definitions/models.IngredientModel'
+        type: array
+      title:
+        type: string
     type: object
   models.TokenCheckResult:
     properties:
@@ -95,6 +122,35 @@ info:
   title: MonGorilla Project
   version: "1.0"
 paths:
+  /api/recipes:
+    post:
+      consumes:
+      - application/json
+      description: Creating Recipe in DB with given request body
+      operationId: create-new-recipe
+      parameters:
+      - description: Enter recipe data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.RecipeCreateBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: create new recipe
+      tags:
+      - Users
   /api/users/current_user:
     get:
       consumes:
