@@ -21,7 +21,9 @@
 
 ## <a name="what-is-this"> 🌀 Описание проекта</a>
 
-monGorilla - готовая основа для быстрой сборки backend-сервисов на основе `Gorilla Mux`, База данных - `Mongo`. Авторизация - `JWT`. Интерфейс Базы данных - `MongoExpress`. Интерфейс API `Swagger`. Мониторинг - `Prometheus`. Метрики хоста - `Node Exporter`. Визуализация - `Grafana`. Сборка - `Docker Compose`.
+monGorilla - готовая основа для быстрой сборки backend-сервисов на основе `Gorilla Mux`, Авторизация - `JWT`. База данных - `Mongo`. Интерфейс Базы данных - `MongoExpress`. Интерфейс API `Swagger`. Мониторинг - `Prometheus`. Метрики хоста - `Node Exporter`. Визуализация - `Grafana`. Сборка - `Docker Compose`.
+
+![Screen Shot](docs/extras/schema.png)
 
 ## <a name="api_docs"> 📈 Краткая документация API</a>
 
@@ -176,10 +178,14 @@ sudo docker-compose up --build
 MONGO_EXPRESS_USERNAME=admin
 MONGO_EXPRESS_PASSWORD=pass
 ```
-Картинка
-  
+![Screen Shot](docs/extras/mongoexpress_auth.png)
+
+2. Готово
+
+![Screen Shot](docs/extras/mongoexpress_ready.png)
 
 </details>
+
 <details>
 <summary>Как подключить Grafana к Prometheus? </summary>
 
