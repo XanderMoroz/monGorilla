@@ -106,39 +106,70 @@ func CreateRecipe(w http.ResponseWriter, r *http.Request) {
 // @Tags 		Users
 // @ID			get-all-recipes-of-current-user
 // @Produce		json
-// @Success		200		{object}	[]models.User
+// @Success		200		{object}	[]models.RecipeModel
 // @Security  	Bearer
-// @Router		/api/users [get]
-func GetAllUsers(w http.ResponseWriter, r *http.Request) {
+// @Router		/api/recipes [get]
+func GetAllMyRecipes(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Allow-Control-Allow-Methods", "GET")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	var users []models.User
-	defer cancel()
+	CurrentUserResult := new(models.CurrentUserResult)
 
-	results, err := userCollection.Find(ctx, bson.M{})
-
+	log.Println("Валидируем токен из заголовка...")
+	jwtFromHeader := r.Header.Get("Authorization")
+	userId, err := utils.ParseUserIDFromJWTToken(jwtFromHeader)
 	if err != nil {
-		log.Printf("При извлечении списка записей - произошла ошибка: <%v>\n", err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		log.Println("При извлечении userId произошла ошибка")
+		CurrentUserResult.Result.Success = false
+		CurrentUserResult.Result.ErrorCode = utils.ERR0304
+		CurrentUserResult.Result.ErrorDescription = utils.ERR0304.ToDescription()
+		CurrentUserResult.Result.ErrorException = utils.ExceptionToString(err)
+		json.NewEncoder(w).Encode(CurrentUserResult)
+	} else {
+		log.Println("...успешно")
 	}
 
-	//reading from the db in an optimal way
-	defer results.Close(ctx)
-	for results.Next(ctx) {
-		var singleUser models.User
-		if err = results.Decode(&singleUser); err != nil {
-			log.Printf("При обработке списка записей -произошла ошибка: <%v>\n", err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	var user models.CurrentUserModel
+	defer cancel()
+
+	objId, _ := primitive.ObjectIDFromHex(userId)
+
+	err = userCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&user)
+	if err != nil {
+		log.Printf("При извлечении записи -произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	} else {
+		log.Printf("Запись успешно извлечена: <%+v>\n", user)
+
+		// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		var userRecipes []models.RecipeModel
+		// defer cancel()
+
+		results, err := recipeCollection.Find(ctx, bson.M{"authoremail": user.Email})
+
+		if err != nil {
+			log.Printf("При извлечении списка записей - произошла ошибка: <%v>\n", err.Error())
+			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
 
-		users = append(users, singleUser)
-	}
+		//reading from the db in an optimal way
+		defer results.Close(ctx)
+		for results.Next(ctx) {
+			var singleRecipe models.RecipeModel
+			if err = results.Decode(&singleRecipe); err != nil {
+				log.Printf("При обработке списка записей -произошла ошибка: <%v>\n", err.Error())
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
 
-	json.NewEncoder(w).Encode(users)
+			userRecipes = append(userRecipes, singleRecipe)
+		}
+
+		json.NewEncoder(w).Encode(userRecipes)
+	}
 }
 
 // // @Summary		get a user by ID

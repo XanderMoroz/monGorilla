@@ -15,6 +15,19 @@ definitions:
       title:
         type: string
     type: object
+  models.RecipeModel:
+    properties:
+      author_email:
+        type: string
+      id:
+        type: string
+      stages:
+        items:
+          $ref: '#/definitions/models.StageModel'
+        type: array
+      title:
+        type: string
+    type: object
   models.Result:
     properties:
       error_code:
@@ -123,6 +136,23 @@ info:
   version: "1.0"
 paths:
   /api/recipes:
+    get:
+      description: Get all recipes of authenticated user
+      operationId: get-all-recipes-of-current-user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.RecipeModel'
+            type: array
+      security:
+      - Bearer: []
+      summary: get all my recipes
+      tags:
+      - Users
     post:
       consumes:
       - application/json

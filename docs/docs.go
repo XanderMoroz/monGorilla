@@ -25,6 +25,33 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/api/recipes": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all recipes of authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "get all my recipes",
+                "operationId": "get-all-recipes-of-current-user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.RecipeModel"
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -182,6 +209,26 @@ const docTemplate = `{
         "models.RecipeCreateBody": {
             "type": "object",
             "properties": {
+                "stages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.StageModel"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.RecipeModel": {
+            "type": "object",
+            "properties": {
+                "author_email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
                 "stages": {
                     "type": "array",
                     "items": {

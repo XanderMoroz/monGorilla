@@ -30,7 +30,7 @@ func CommonRouter() *mux.Router {
 
 	router.HandleFunc("/api/recipes", controllers.CreateRecipe).Methods("POST")
 	// router.HandleFunc("/api/users/{id}", controllers.GetUserByID).Methods("GET")
-	// router.HandleFunc("/api/users", controllers.GetAllUsers).Methods("GET")
+	router.HandleFunc("/api/recipes", controllers.GetAllMyRecipes).Methods("GET")
 	// router.HandleFunc("/api/users/{id}", controllers.UpdateUserByID).Methods("PUT")
 	// router.HandleFunc("/api/users/{id}", controllers.DeleteBook).Methods("DELETE")
 
