@@ -11,8 +11,6 @@
 
 ## 📋 Table of Contents
 
-  
-
 1. 🌀 [Описание проекта](#what-is-this)
 2. 📈 [Краткая документация API](#api_docs)
 3. 💾 [База данных](#database_scheme)
@@ -30,44 +28,69 @@ monGorilla - готовая основа для быстрой сборки back
 Работа с моделями осуществляется по следующим эндпоинтам:
 
 
+| HTTP Method  | HTTP request            | Description                                                    |
+| :----------: | :---------------------- | :------------------------------------------------------------- |
+|  [**POST**]  | /api/users/register     | Регистрация нового пользователя                                |
+|  [**POST**]  | /api/users/login        | Авторизация пользователя про e-mail и паролю                   |
+|  [**GET**]   | /api/users/current_user | Извлечение авторизованного пользователя по токену              |
+|  [**GET**]   | /api/recipes            | Извлечь все рецепты авторизованного пользователя               |
+|  [**POST**]  | /api/recipes            | Создать новый рецепт (только для авторизованного пользователя) |
+|  [**GET**]   | /api/recipes/{id}       | Извлечь рецепт по ID                                           |
+|  [**PUT**]   | /api/recipes/{id}       | Обновить рецепт по ID (только для авторов)                     |
+| [**DELETE**] | /api/recipes/{id}       | Удалить рецепт по ID (только для авторов)                      |
 
-
-| HTTP Method  | HTTP request               | Description                                       |
-| :----------: | :------------------------- | :------------------------------------------------ |
-|  [**POST**]  | /api/users                 | Регистрация нового пользователя                   |
-|  [**GET**]   | /api/users                 | Извлечь всех пользователей про логину и паролю    |
-|  [**GET**]   | /api/users/{id}            | Извлечение  пользователя по ID                    |
-|  [**PUT**]   | /api/users/{id}            | Обновить пользователя по ID                       |
-| [**DELETE**] | /api/users/{id}            | Удалить пользователя по ID                        |
 
 
 ## <a name="database_scheme"> 💾 База данных </a>
 
   
 
-База данных содержит 1 модель:
+База данных содержит 2 модели:
     - **Пользователь** (User)
+    - **Рецепт** (Recipe)
 
 
   
-  
-  
-
-<details>
-
+  <details>
 <summary>ДЕТАЛЬНАЯ ИНФОРМАЦИЯ О МОДЕЛЯХ </summary>
 
+1. Пользователь (User)
+```go
+type UserModel struct {
+	Id          primitive.ObjectID `json:"id,omitempty"`            
+	Password    string             `json:"password,omitempty"`      //Пароль
+	FirstName   string             `json:"first_name,omitempty"`    //Имя
+	LastName    string             `json:"last_name,omitempty"`     //Фамилия
+	PhoneNumber string             `json:"phone_number,omitempty"`  //Номер телефона
+	Email       string             `json:"email,omitempty"`         //Email
+}
+```
+
+2. Рецепт (Recipe)
+```go
+// Represents user Recipe
+type RecipeModel struct {
+	Id          primitive.ObjectID `json:"id,omitempty"`
+	Title       string             `json:"title,omitempty"`         //Название рецепта
+	Stages      []StageModel       `json:"stages,omitempty"`        //Список шагов изготовления
+	AuthorEmail string             `json:"author_email,omitempty"`  //Email автора рецепта
+}
+
+// Represents user model
+type StageModel struct {
+	Title       string            `json:"title,omitempty"`          //Название шага
+	Description string            `json:"description,omitempty"`    //Описание шага
+	Ingredients []IngredientModel `json:"ingredients,omitempty"`    //Список ингредиентов
+}
+
+// Represents user model
+type IngredientModel struct {
+	Subject   string `json:"subject,omitempty"`                     //Название ингридиента
+	Condition string `json:"condition,omitempty"`                   //Условие, количество, вес и др
+}
+```
+
 </details>
-
-
-<details>
-
-<summary>ДЕТАЛЬНАЯ СХЕМА БАЗЫ ДАННЫХ</summary>
-
-![Screen Shot](docs/extras/erd.jpg)
-
-</details>
-
   
 
 ## <a name="installation"> 🚀 Установка и использование</a>
@@ -119,7 +142,6 @@ MONGO_DB_HOST="mongo"       # С docker
 MONGO_EXPRESS_USERNAME="admin"
 MONGO_EXPRESS_PASSWORD="rndm-pass"
 MONGO_EXPRESS_SERVER="mongodb"
-
 
 
 ```
