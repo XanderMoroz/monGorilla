@@ -251,91 +251,121 @@ func UpdateRecipeByID(w http.ResponseWriter, r *http.Request) {
 		return
 	} else {
 		log.Printf("Пользователь авторизован: <%+v>\n", user)
-
-		params := mux.Vars(r)
-		log.Printf("Поступил запрос на обновление записи по ID: <%s>\n", params["id"])
-		// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		recipeId := params["id"]
-		var recipe models.RecipeCreateBody
-		defer cancel()
-
-		objId, _ := primitive.ObjectIDFromHex(recipeId)
-
-		//validate the request body
-		err := json.NewDecoder(r.Body).Decode(&recipe)
-		if err != nil {
-			log.Printf("При извлечении тела запроса - Произошла ошибка: <%v>\n", err.Error())
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		} else {
-			log.Println("...успешно")
-		}
-
-		updated := models.RecipeUpdateBody{
-			Title:       recipe.Title,
-			Stages:      recipe.Stages,
-			AuthorEmail: user.Email,
-		}
-
-		// update := bson.M{"name": user.Name, "location": user.Location, "title": user.Title}
-
-		result, err := recipeCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": updated})
-		if err != nil {
-			log.Printf("При обновлении записи - произошла ошибка: <%v>\n", err.Error())
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		//get updated recipe details
-		var updatedRecipe models.RecipeModel
-		if result.MatchedCount == 1 {
-			err := recipeCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&updatedRecipe)
-			if err != nil {
-				log.Printf("При извлечении записи - произошла ошибка: <%v>\n", err.Error())
-				http.Error(w, err.Error(), http.StatusNotFound)
-				return
-			}
-		}
-
-		json.NewEncoder(w).Encode(updatedRecipe)
 	}
+
+	params := mux.Vars(r)
+	log.Printf("Поступил запрос на обновление записи по ID: <%s>\n", params["id"])
+	recipeId := params["id"]
+	var recipe models.RecipeCreateBody
+	defer cancel()
+
+	objId, _ = primitive.ObjectIDFromHex(recipeId)
+
+	//validate the request body
+	err = json.NewDecoder(r.Body).Decode(&recipe)
+	if err != nil {
+		log.Printf("При извлечении тела запроса - Произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	} else {
+		log.Println("...успешно")
+	}
+
+	updated := models.RecipeUpdateBody{
+		Title:       recipe.Title,
+		Stages:      recipe.Stages,
+		AuthorEmail: user.Email,
+	}
+
+	result, err := recipeCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": updated})
+	if err != nil {
+		log.Printf("При обновлении записи - произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	//get updated recipe details
+	var updatedRecipe models.RecipeModel
+	if result.MatchedCount == 1 {
+		err := recipeCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&updatedRecipe)
+		if err != nil {
+			log.Printf("При извлечении записи - произошла ошибка: <%v>\n", err.Error())
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+	}
+
+	json.NewEncoder(w).Encode(updatedRecipe)
+
 }
 
-// // @Summary		delete a user by ID
-// // @Description Delete a user by ID
-// // @ID			delete-user-by-id
-// // @Tags 		Users
-// // @Produce		json
-// // @Param		id					path		string		true	"UserID"
-// // @Success		200					{object}	[]string
-// // @Failure		404					{object}	[]string
-// // @Router		/api/users/{id} 	[delete]
-// func DeleteBook(w http.ResponseWriter, r *http.Request) {
-// 	w.Header().Set("Content-Type", "application/json")
-// 	w.Header().Set("Allow-Control-Allow-Methods", "DELETE")
+// @Summary		delete a recipe by ID
+// @Description Delete a recipe by ID
+// @ID			delete-recipe-by-id
+// @Tags 		Recipes
+// @Produce		json
+// @Param		id					path		string		true	"RecipeID"
+// @Success		200					{object}	[]string
+// @Failure		404					{object}	[]string
+// @Security  	Bearer
+// @Router		/api/recipes/{id} 	[delete]
+func DeleteRecipeByID(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Allow-Control-Allow-Methods", "DELETE")
 
-// 	params := mux.Vars(r)
-// 	log.Printf("Поступил запрос на удаление записи по ID: <%s>\n", params["id"])
-// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-// 	userId := params["id"]
-// 	defer cancel()
+	CurrentUserResult := new(models.CurrentUserResult)
 
-// 	objId, _ := primitive.ObjectIDFromHex(userId)
+	log.Println("Валидируем токен из заголовка...")
+	jwtFromHeader := r.Header.Get("Authorization")
+	userId, err := utils.ParseUserIDFromJWTToken(jwtFromHeader)
+	if err != nil {
+		log.Println("При извлечении userId произошла ошибка")
+		CurrentUserResult.Result.Success = false
+		CurrentUserResult.Result.ErrorCode = utils.ERR0304
+		CurrentUserResult.Result.ErrorDescription = utils.ERR0304.ToDescription()
+		CurrentUserResult.Result.ErrorException = utils.ExceptionToString(err)
+		json.NewEncoder(w).Encode(CurrentUserResult)
+	} else {
+		log.Println("...успешно")
+	}
 
-// 	result, err := userCollection.DeleteOne(ctx, bson.M{"id": objId})
-// 	if err != nil {
-// 		log.Printf("При удалении записи - произошла ошибка: <%v>\n", err.Error())
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	var user models.CurrentUserModel
+	defer cancel()
 
-// 	if result.DeletedCount < 1 {
-// 		log.Printf("При извлечении тела запроса - Произошла ошибка: <%v>\n", err.Error())
-// 		http.Error(w, err.Error(), http.StatusNotFound)
-// 		return
-// 	}
-// 	json.NewEncoder(w).Encode("User successfully deleted!")
-// }
+	objId, _ := primitive.ObjectIDFromHex(userId)
+
+	err = userCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&user)
+	if err != nil {
+		log.Printf("При извлечении записи -произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	} else {
+		log.Printf("Пользователь авторизован: <%+v>\n", user)
+	}
+
+	params := mux.Vars(r)
+	log.Printf("Поступил запрос на удаление записи по ID: <%s>\n", params["id"])
+	// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	recipeId := params["id"]
+	defer cancel()
+
+	objId, _ = primitive.ObjectIDFromHex(recipeId)
+
+	result, err := recipeCollection.DeleteOne(ctx, bson.M{"id": objId})
+	if err != nil {
+		log.Printf("При удалении записи - произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if result.DeletedCount < 1 {
+		log.Printf("При извлечении тела запроса - Произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	json.NewEncoder(w).Encode("Recipe successfully deleted!")
+}
 
 // //MongoDB helpers
 // // func checkNilError(err error) {

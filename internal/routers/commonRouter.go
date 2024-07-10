@@ -32,12 +32,7 @@ func CommonRouter() *mux.Router {
 	router.HandleFunc("/api/recipes/{id}", controllers.GetRecipeByID).Methods("GET")
 	router.HandleFunc("/api/recipes", controllers.GetAllMyRecipes).Methods("GET")
 	router.HandleFunc("/api/recipes/{id}", controllers.UpdateRecipeByID).Methods("PUT")
-	// router.HandleFunc("/api/users/{id}", controllers.DeleteBook).Methods("DELETE")
-
-	// router.HandleFunc("/api/movies", controllers.GetAlIMovies).Methods("GET")
-	// router.HandleFunc("/api/movie/{id}", controllers.MarkAsWatched).Methods("PUT")
-	// router.HandleFunc("/api/movie/{id}", controllers.DeleteMovie).Methods("DELETE")
-	// router.HandleFunc("/api/deleteallmovies", controllers.DeleteAllMovies).Methods("DELETE")
+	router.HandleFunc("/api/recipes/{id}", controllers.DeleteRecipeByID).Methods("DELETE")
 
 	return router
 }
