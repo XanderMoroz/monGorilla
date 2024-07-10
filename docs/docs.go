@@ -24,41 +24,14 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/users": {
+        "/api/users/current_user": {
             "get": {
-                "description": "Get all users from db",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "get all users",
-                "operationId": "get-all-users",
-                "parameters": [
+                "security": [
                     {
-                        "type": "string",
-                        "default": "Bearer \u003cAdd access token here\u003e",
-                        "description": "Insert your access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
+                        "Bearer": []
                     }
                 ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.User"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Creating User in DB with given request body",
+                "description": "Token check method for authentication",
                 "consumes": [
                     "application/json"
                 ],
@@ -66,32 +39,14 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "Auth"
                 ],
-                "summary": "create new user",
-                "operationId": "create-new-user",
-                "parameters": [
-                    {
-                        "description": "Enter user data",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateUserBody"
-                        }
-                    }
-                ],
+                "summary": "Check validity of token",
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/models.TokenCheckResult"
                         }
                     }
                 }
@@ -164,156 +119,9 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/api/users/{id}": {
-            "get": {
-                "description": "Get a user by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "get a user by ID",
-                "operationId": "get-user-by-id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "UserID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.User"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update user by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "update user by ID",
-                "operationId": "update-user-by-id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "UserID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Введите новые данные пользователя",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateUserBody"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete a user by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "delete a user by ID",
-                "operationId": "delete-user-by-id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "UserID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
-        "models.CreateUserBody": {
-            "type": "object",
-            "required": [
-                "location",
-                "name",
-                "title"
-            ],
-            "properties": {
-                "location": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
         "models.Result": {
             "type": "object",
             "properties": {
@@ -331,24 +139,16 @@ const docTemplate = `{
                 }
             }
         },
-        "models.User": {
+        "models.TokenCheckResult": {
             "type": "object",
-            "required": [
-                "location",
-                "name",
-                "title"
-            ],
             "properties": {
-                "id": {
+                "client_time": {
                     "type": "string"
                 },
-                "location": {
-                    "type": "string"
+                "result": {
+                    "$ref": "#/definitions/models.Result"
                 },
-                "name": {
-                    "type": "string"
-                },
-                "title": {
+                "server_time": {
                     "type": "string"
                 }
             }

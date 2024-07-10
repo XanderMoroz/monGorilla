@@ -26,11 +26,14 @@ func CommonRouter() *mux.Router {
 	// User routes
 	router.HandleFunc("/api/users/register", controllers.Register).Methods("POST")
 	router.HandleFunc("/api/users/login", controllers.Login).Methods("POST")
+	router.HandleFunc("/api/users/current_user", controllers.CurrentUser).Methods("GET")
+	// router.HandleFunc("/api/users/token-check", controllers.TokenCheck).Methods("POST")
+
 	// router.HandleFunc("/api/users", controllers.CreateUser).Methods("POST")
-	router.HandleFunc("/api/users/{id}", controllers.GetUserByID).Methods("GET")
-	router.HandleFunc("/api/users", controllers.GetAllUsers).Methods("GET")
-	router.HandleFunc("/api/users/{id}", controllers.UpdateUserByID).Methods("PUT")
-	router.HandleFunc("/api/users/{id}", controllers.DeleteBook).Methods("DELETE")
+	// router.HandleFunc("/api/users/{id}", controllers.GetUserByID).Methods("GET")
+	// router.HandleFunc("/api/users", controllers.GetAllUsers).Methods("GET")
+	// router.HandleFunc("/api/users/{id}", controllers.UpdateUserByID).Methods("PUT")
+	// router.HandleFunc("/api/users/{id}", controllers.DeleteBook).Methods("DELETE")
 
 	// router.HandleFunc("/api/movies", controllers.GetAlIMovies).Methods("GET")
 	// router.HandleFunc("/api/movie/{id}", controllers.MarkAsWatched).Methods("PUT")

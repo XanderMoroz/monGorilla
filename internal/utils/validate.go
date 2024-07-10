@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -11,6 +12,26 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 )
+
+func ValidateHeader(bearerHeader string) (interface{}, error) {
+	bearerToken := strings.Split(bearerHeader, " ")[1]
+	claims := jwt.MapClaims{}
+	token, err := jwt.ParseWithClaims(bearerToken, claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("error decoding token")
+		}
+		secret_key := os.Getenv("JWT_SECRET_KEY")
+		return secret_key, nil
+	})
+	if err != nil {
+		fmt.Errorf(err.Error())
+		return nil, err
+	}
+	if token.Valid {
+		return claims["user"].(string), nil
+	}
+	return nil, errors.New("invalid token")
+}
 
 func ValidatePassword(password string) bool {
 

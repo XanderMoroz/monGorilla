@@ -1,17 +1,4 @@
 definitions:
-  models.CreateUserBody:
-    properties:
-      location:
-        type: string
-      name:
-        type: string
-      title:
-        type: string
-    required:
-    - location
-    - name
-    - title
-    type: object
   models.Result:
     properties:
       error_code:
@@ -23,20 +10,14 @@ definitions:
       success:
         type: boolean
     type: object
-  models.User:
+  models.TokenCheckResult:
     properties:
-      id:
+      client_time:
         type: string
-      location:
+      result:
+        $ref: '#/definitions/models.Result'
+      server_time:
         type: string
-      name:
-        type: string
-      title:
-        type: string
-    required:
-    - location
-    - name
-    - title
     type: object
   models.UserLoginArgs:
     properties:
@@ -114,141 +95,23 @@ info:
   title: MonGorilla Project
   version: "1.0"
 paths:
-  /api/users:
+  /api/users/current_user:
     get:
-      description: Get all users from db
-      operationId: get-all-users
-      parameters:
-      - default: Bearer <Add access token here>
-        description: Insert your access token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.User'
-            type: array
-      summary: get all users
-      tags:
-      - Users
-    post:
       consumes:
       - application/json
-      description: Creating User in DB with given request body
-      operationId: create-new-user
-      parameters:
-      - description: Enter user data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreateUserBody'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-      summary: create new user
-      tags:
-      - Users
-  /api/users/{id}:
-    delete:
-      description: Delete a user by ID
-      operationId: delete-user-by-id
-      parameters:
-      - description: UserID
-        in: path
-        name: id
-        required: true
-        type: string
+      description: Token check method for authentication
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              type: string
-            type: array
-        "404":
-          description: Not Found
-          schema:
-            items:
-              type: string
-            type: array
-      summary: delete a user by ID
+            $ref: '#/definitions/models.TokenCheckResult'
+      security:
+      - Bearer: []
+      summary: Check validity of token
       tags:
-      - Users
-    get:
-      description: Get a user by ID
-      operationId: get-user-by-id
-      parameters:
-      - description: UserID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.User'
-        "404":
-          description: Not Found
-          schema:
-            items:
-              type: string
-            type: array
-      summary: get a user by ID
-      tags:
-      - Users
-    put:
-      description: Update user by ID
-      operationId: update-user-by-id
-      parameters:
-      - description: UserID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Введите новые данные пользователя
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreateUserBody'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              type: string
-            type: array
-        "404":
-          description: Not Found
-          schema:
-            items:
-              type: string
-            type: array
-      summary: update user by ID
-      tags:
-      - Users
+      - Auth
   /api/users/login:
     post:
       consumes:
