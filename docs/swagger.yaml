@@ -12,11 +12,11 @@ definitions:
     type: object
   models.TokenCheckResult:
     properties:
-      client_time:
+      expired:
         type: string
       result:
         $ref: '#/definitions/models.Result'
-      server_time:
+      token:
         type: string
     type: object
   models.UserLoginArgs:

@@ -1,13 +1,11 @@
 package models
 
-import "time"
-
 type TokenCheckArgs struct {
-	ClientTime time.Time `json:"client_time"`
+	Token string `json:"token"`
 }
 
 type TokenCheckResult struct {
-	ClientTime time.Time `json:"client_time"`
-	ServerTime time.Time `json:"server_time"`
-	Result     Result    `json:"result"`
+	Token   string `json:"token"`
+	Expired string `json:"expired"`
+	Result  Result `json:"result"`
 }

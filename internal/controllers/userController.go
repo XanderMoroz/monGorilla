@@ -274,13 +274,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(userLoginResult)
 }
 
-// TokenCheck  		TokenValidate godoc
+// CurrentUser  	GetCurrentUser godoc
 // @Summary      	Check validity of token
 // @Description  	Token check method for authentication
 // @Tags         	Auth
 // @Accept       	json
 // @Produce      	json
-// // @Param        	tokenCheckArgs 		body 		models.TokenCheckArgs 	true 	"TokenCheck"
 // @Success      	200  				{object}  	models.TokenCheckResult
 // @Security  		Bearer
 // @Router       	/api/users/current_user [get]

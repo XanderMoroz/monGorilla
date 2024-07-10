@@ -142,13 +142,13 @@ const docTemplate = `{
         "models.TokenCheckResult": {
             "type": "object",
             "properties": {
-                "client_time": {
+                "expired": {
                     "type": "string"
                 },
                 "result": {
                     "$ref": "#/definitions/models.Result"
                 },
-                "server_time": {
+                "token": {
                     "type": "string"
                 }
             }
