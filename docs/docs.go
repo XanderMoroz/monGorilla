@@ -36,7 +36,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "Recipes"
                 ],
                 "summary": "get all my recipes",
                 "operationId": "get-all-recipes-of-current-user",
@@ -66,7 +66,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "Recipes"
                 ],
                 "summary": "create new recipe",
                 "operationId": "create-new-recipe",
@@ -92,6 +92,45 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/recipes/{id}": {
+            "get": {
+                "description": "Get a recipe by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Recipes"
+                ],
+                "summary": "get a recipe by ID",
+                "operationId": "get-recipe-by-id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "RecipeID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.RecipeModel"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         }
                     }
                 }

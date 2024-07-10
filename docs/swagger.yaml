@@ -152,7 +152,7 @@ paths:
       - Bearer: []
       summary: get all my recipes
       tags:
-      - Users
+      - Recipes
     post:
       consumes:
       - application/json
@@ -180,7 +180,33 @@ paths:
       - Bearer: []
       summary: create new recipe
       tags:
-      - Users
+      - Recipes
+  /api/recipes/{id}:
+    get:
+      description: Get a recipe by ID
+      operationId: get-recipe-by-id
+      parameters:
+      - description: RecipeID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.RecipeModel'
+        "404":
+          description: Not Found
+          schema:
+            items:
+              type: string
+            type: array
+      summary: get a recipe by ID
+      tags:
+      - Recipes
   /api/users/current_user:
     get:
       consumes:

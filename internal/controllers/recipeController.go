@@ -15,6 +15,7 @@ import (
 	"github.com/XanderMoroz/mongoMovies/configs"
 	"github.com/XanderMoroz/mongoMovies/internal/models"
 	"github.com/XanderMoroz/mongoMovies/internal/utils"
+	"github.com/gorilla/mux"
 	// "github.com/XanderMoroz/mongoMovies/internal/utils"
 )
 
@@ -22,7 +23,7 @@ var recipeCollection *mongo.Collection = configs.GetCollection(configs.DB, "reci
 
 // @Summary     create new recipe
 // @Description Creating Recipe in DB with given request body
-// @Tags        Users
+// @Tags        Recipes
 // @ID			create-new-recipe
 // @Accept      json
 // @Produce     json
@@ -103,7 +104,7 @@ func CreateRecipe(w http.ResponseWriter, r *http.Request) {
 
 // @Summary		get all my recipes
 // @Description Get all recipes of authenticated user
-// @Tags 		Users
+// @Tags 		Recipes
 // @ID			get-all-recipes-of-current-user
 // @Produce		json
 // @Success		200		{object}	[]models.RecipeModel
@@ -151,7 +152,7 @@ func GetAllMyRecipes(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			log.Printf("При извлечении списка записей - произошла ошибка: <%v>\n", err.Error())
-			http.Error(w, err.Error(), http.StatusNotFound)
+			http.Error(w, err.Error(), http.StatusNoContent)
 			return
 		}
 
@@ -172,39 +173,39 @@ func GetAllMyRecipes(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// // @Summary		get a user by ID
-// // @Description Get a user by ID
-// // @Tags 		Users
-// // @ID			get-user-by-id
-// // @Produce		json
-// // @Param		id					path		string			true	"UserID"
-// // @Success		200					{object}	models.User
-// // @Failure		404					{object}	[]string
-// // @Router		/api/users/{id} 	[get]
-// func GetUserByID(w http.ResponseWriter, r *http.Request) {
-// 	w.Header().Set("Content-Type", "application/json")
-// 	w.Header().Set("Allow-Control-Allow-Methods", "GET")
+// @Summary		get a recipe by ID
+// @Description Get a recipe by ID
+// @Tags 		Recipes
+// @ID			get-recipe-by-id
+// @Produce		json
+// @Param		id					path		string			true	"RecipeID"
+// @Success		200					{object}	models.RecipeModel
+// @Failure		404					{object}	[]string
+// @Router		/api/recipes/{id} 	[get]
+func GetRecipeByID(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Allow-Control-Allow-Methods", "GET")
 
-// 	params := mux.Vars(r)
-// 	log.Printf("Поступил запрос на извлечение записи по ID: <%s>\n", params["id"])
+	params := mux.Vars(r)
+	log.Printf("Поступил запрос на извлечение записи по ID: <%s>\n", params["id"])
 
-// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-// 	userId := params["id"]
-// 	var user models.User
-// 	defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	userId := params["id"]
+	var recipe models.RecipeModel
+	defer cancel()
 
-// 	objId, _ := primitive.ObjectIDFromHex(userId)
+	objId, _ := primitive.ObjectIDFromHex(userId)
 
-// 	err := userCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&user)
-// 	if err != nil {
-// 		log.Printf("При извлечении записи -произошла ошибка: <%v>\n", err.Error())
-// 		http.Error(w, err.Error(), http.StatusBadRequest)
-// 		return
-// 	} else {
-// 		log.Printf("Запись успешно извлечена: <%+v>\n", user)
-// 	}
-// 	json.NewEncoder(w).Encode(user)
-// }
+	err := recipeCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&recipe)
+	if err != nil {
+		log.Printf("При извлечении записи -произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusNoContent)
+		return
+	} else {
+		log.Printf("Рецепт успешно извлечен: <%+v>\n", recipe)
+	}
+	json.NewEncoder(w).Encode(recipe)
+}
 
 // // @Summary			update user by ID
 // // @Description 	Update user by ID
