@@ -142,7 +142,7 @@ func GetAllMyRecipes(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	} else {
-		log.Printf("Запись успешно извлечена: <%+v>\n", user)
+		log.Printf("Пользователь авторизован: <%+v>\n", user)
 
 		// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		var userRecipes []models.RecipeModel
@@ -207,61 +207,99 @@ func GetRecipeByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(recipe)
 }
 
-// // @Summary			update user by ID
-// // @Description 	Update user by ID
-// // @ID				update-user-by-id
-// // @Tags 			Users
-// // @Produce			json
-// // @Param			id					path		string									true	"UserID"
-// // @Param           request         	body        models.CreateUserBody    true    	"Введите новые данные пользователя"
-// // @Success			200	{object}		[]string
-// // @Failure			404	{object}		[]string
-// // @Router			/api/users/{id} 	[put]
-// func UpdateUserByID(w http.ResponseWriter, r *http.Request) {
-// 	w.Header().Set("Content-Type", "application/json")
-// 	w.Header().Set("Allow-Control-Allow-Methods", "PUT")
+// @Summary			update recipe by ID
+// @Description 	Update recipe by ID
+// @ID				update-recipe-by-id
+// @Tags 			Recipes
+// @Produce			json
+// @Param			id					path		string								true	"RecipeID"
+// @Param           request         	body        models.RecipeCreateBody    true    	"Введите новые данные рецепта"
+// @Success			200	{object}		[]string
+// @Failure			404	{object}		[]string
+// @Security  		Bearer
+// @Router			/api/recipes/{id} 	[put]
+func UpdateUserByID(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Allow-Control-Allow-Methods", "PUT")
 
-// 	params := mux.Vars(r)
-// 	log.Printf("Поступил запрос на обновление записи по ID: <%s>\n", params["id"])
-// 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-// 	userId := params["id"]
-// 	var user models.User
-// 	defer cancel()
+	CurrentUserResult := new(models.CurrentUserResult)
 
-// 	objId, _ := primitive.ObjectIDFromHex(userId)
+	log.Println("Валидируем токен из заголовка...")
+	jwtFromHeader := r.Header.Get("Authorization")
+	userId, err := utils.ParseUserIDFromJWTToken(jwtFromHeader)
+	if err != nil {
+		log.Println("При извлечении userId произошла ошибка")
+		CurrentUserResult.Result.Success = false
+		CurrentUserResult.Result.ErrorCode = utils.ERR0304
+		CurrentUserResult.Result.ErrorDescription = utils.ERR0304.ToDescription()
+		CurrentUserResult.Result.ErrorException = utils.ExceptionToString(err)
+		json.NewEncoder(w).Encode(CurrentUserResult)
+	} else {
+		log.Println("...успешно")
+	}
 
-// 	//validate the request body
-// 	err := json.NewDecoder(r.Body).Decode(&user)
-// 	if err != nil {
-// 		log.Printf("При извлечении тела запроса - Произошла ошибка: <%v>\n", err.Error())
-// 		http.Error(w, err.Error(), http.StatusBadRequest)
-// 		return
-// 	} else {
-// 		log.Println("...успешно")
-// 	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	var user models.CurrentUserModel
+	defer cancel()
 
-// 	update := bson.M{"name": user.Name, "location": user.Location, "title": user.Title}
+	objId, _ := primitive.ObjectIDFromHex(userId)
 
-// 	result, err := userCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
-// 	if err != nil {
-// 		log.Printf("При обновлении записи -произошла ошибка: <%v>\n", err.Error())
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
+	err = userCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&user)
+	if err != nil {
+		log.Printf("При извлечении записи -произошла ошибка: <%v>\n", err.Error())
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	} else {
+		log.Printf("Пользователь авторизован: <%+v>\n", user)
 
-// 	//get updated user details
-// 	var updatedUser models.User
-// 	if result.MatchedCount == 1 {
-// 		err := userCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&updatedUser)
-// 		if err != nil {
-// 			log.Printf("При извлечении записи -произошла ошибка: <%v>\n", err.Error())
-// 			http.Error(w, err.Error(), http.StatusNotFound)
-// 			return
-// 		}
-// 	}
+		params := mux.Vars(r)
+		log.Printf("Поступил запрос на обновление записи по ID: <%s>\n", params["id"])
+		// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		recipeId := params["id"]
+		var recipe models.RecipeCreateBody
+		defer cancel()
 
-// 	json.NewEncoder(w).Encode(updatedUser)
-// }
+		objId, _ := primitive.ObjectIDFromHex(recipeId)
+
+		//validate the request body
+		err := json.NewDecoder(r.Body).Decode(&recipe)
+		if err != nil {
+			log.Printf("При извлечении тела запроса - Произошла ошибка: <%v>\n", err.Error())
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		} else {
+			log.Println("...успешно")
+		}
+
+		updated := models.RecipeUpdateBody{
+			Title:       recipe.Title,
+			Stages:      recipe.Stages,
+			AuthorEmail: user.Email,
+		}
+
+		// update := bson.M{"name": user.Name, "location": user.Location, "title": user.Title}
+
+		result, err := recipeCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": updated})
+		if err != nil {
+			log.Printf("При обновлении записи - произошла ошибка: <%v>\n", err.Error())
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		//get updated user details
+		var updatedUser models.RecipeModel
+		if result.MatchedCount == 1 {
+			err := userCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&updatedUser)
+			if err != nil {
+				log.Printf("При извлечении записи - произошла ошибка: <%v>\n", err.Error())
+				http.Error(w, err.Error(), http.StatusNotFound)
+				return
+			}
+		}
+
+		json.NewEncoder(w).Encode(updatedUser)
+	}
+}
 
 // // @Summary		delete a user by ID
 // // @Description Delete a user by ID

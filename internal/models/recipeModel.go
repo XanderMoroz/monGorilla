@@ -30,6 +30,12 @@ type RecipeCreateBody struct {
 	Stages []StageModel `json:"stages,omitempty"`
 }
 
+type RecipeUpdateBody struct {
+	Title       string       `json:"title,omitempty"`
+	Stages      []StageModel `json:"stages,omitempty"`
+	AuthorEmail string       `json:"author_email,omitempty"`
+}
+
 // Represents Result of creating recipe response Body
 type RecipeCreateResult struct {
 	Result Result `json:"result"`
