@@ -218,7 +218,7 @@ func GetRecipeByID(w http.ResponseWriter, r *http.Request) {
 // @Failure			404	{object}		[]string
 // @Security  		Bearer
 // @Router			/api/recipes/{id} 	[put]
-func UpdateUserByID(w http.ResponseWriter, r *http.Request) {
+func UpdateRecipeByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Allow-Control-Allow-Methods", "PUT")
 
@@ -286,10 +286,10 @@ func UpdateUserByID(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		//get updated user details
-		var updatedUser models.RecipeModel
+		//get updated recipe details
+		var updatedRecipe models.RecipeModel
 		if result.MatchedCount == 1 {
-			err := userCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&updatedUser)
+			err := recipeCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&updatedRecipe)
 			if err != nil {
 				log.Printf("При извлечении записи - произошла ошибка: <%v>\n", err.Error())
 				http.Error(w, err.Error(), http.StatusNotFound)
@@ -297,7 +297,7 @@ func UpdateUserByID(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		json.NewEncoder(w).Encode(updatedUser)
+		json.NewEncoder(w).Encode(updatedRecipe)
 	}
 }
 
